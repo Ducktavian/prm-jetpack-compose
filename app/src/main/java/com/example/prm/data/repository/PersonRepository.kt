@@ -1,0 +1,441 @@
+package com.example.prm.data.repository
+
+import com.example.prm.data.model.Contact
+import com.example.prm.data.model.Interaction
+import com.example.prm.data.model.Person
+import com.example.prm.data.model.PersonalInfo
+import com.example.prm.data.model.Relationship
+
+class PersonRepository {
+
+    val mockPeople = listOf(
+        Person(
+            id = 1,
+            firstName = "Alex",
+            lastName = "Santos",
+            contact = Contact(
+                emails = listOf("alex.santos@email.com"),
+                phones = listOf("+63 917 123 4567"),
+                location = "Quezon City, Philippines",
+                preferredContact = "Email"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2002-05-14",
+                pronouns = "he/him",
+                gender = "Male",
+                occupation = "Software Developer"
+            ),
+            relationship = Relationship(
+                category = "Friend",
+                workplaceOrSchool = "Tech Solutions Inc.",
+                howYouMet = "College",
+                dateYouMet = "2021-08-20"
+            ),
+            interests = listOf(
+                "Technology",
+                "Photography",
+                "Gaming"
+            ),
+            skills = listOf(
+                "JavaScript",
+                "Web Development",
+                "Photography"
+            ),
+            notes = "Alex is easy to talk to and often shares interesting programming projects.",
+            interactions = listOf(
+                Interaction(
+                    id = 1001,
+                    type = "Message",
+                    date = "2026-09-18",
+                    time = "20:30",
+                    title = "Caught up about work",
+                    details = "Talked about Alex's new web development project and upcoming plans."
+                ),
+                Interaction(
+                    id = 1002,
+                    type = "Meetup",
+                    date = "2026-08-30",
+                    time = "15:00",
+                    title = "Coffee meetup",
+                    details = "Met at a cafe and talked about work, games, and college."
+                )
+            )
+        ),
+
+        Person(
+            id = 2,
+            firstName = "Mia",
+            lastName = "Reyes",
+            contact = Contact(
+                emails = listOf("mia.reyes@email.com"),
+                phones = listOf("+63 918 234 5678"),
+                location = "Makati, Philippines",
+                preferredContact = "Phone"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2001-11-03",
+                pronouns = "she/her",
+                gender = "Female",
+                occupation = "Graphic Designer"
+            ),
+            relationship = Relationship(
+                category = "Friend",
+                workplaceOrSchool = "Creative Studio",
+                howYouMet = "University organization",
+                dateYouMet = "2022-02-10"
+            ),
+            interests = listOf(
+                "Design",
+                "Music",
+                "Travel"
+            ),
+            skills = listOf(
+                "Graphic Design",
+                "Illustration",
+                "Branding"
+            ),
+            notes = "Mia enjoys discovering new cafes and frequently works on creative projects.",
+            interactions = listOf(
+                Interaction(
+                    id = 2001,
+                    type = "Message",
+                    date = "2026-09-15",
+                    time = "18:45",
+                    title = "Shared design ideas",
+                    details = "Exchanged ideas about improving portfolio designs."
+                )
+            )
+        ),
+
+        Person(
+            id = 3,
+            firstName = "Daniel",
+            lastName = "Cruz",
+            contact = Contact(
+                emails = listOf("daniel.cruz@email.com"),
+                phones = listOf("+63 919 345 6789"),
+                location = "Pasig, Philippines",
+                preferredContact = "Phone"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "1998-03-21",
+                pronouns = "he/him",
+                gender = "Male",
+                occupation = "Project Manager"
+            ),
+            relationship = Relationship(
+                category = "Mentor",
+                workplaceOrSchool = "Digital Works",
+                howYouMet = "Internship",
+                dateYouMet = "2023-06-12"
+            ),
+            interests = listOf(
+                "Leadership",
+                "Technology",
+                "Business"
+            ),
+            skills = listOf(
+                "Project Management",
+                "Leadership",
+                "Communication"
+            ),
+            notes = "Daniel has given useful advice about career development and project management.",
+            interactions = listOf(
+                Interaction(
+                    id = 3001,
+                    type = "Meeting",
+                    date = "2026-09-10",
+                    time = "14:00",
+                    title = "Career discussion",
+                    details = "Discussed career goals and possible professional development opportunities."
+                )
+            )
+        ),
+
+        Person(
+            id = 4,
+            firstName = "Sofia",
+            lastName = "Garcia",
+            contact = Contact(
+                emails = listOf("sofia.garcia@email.com"),
+                phones = listOf("+63 920 456 7890"),
+                location = "Manila, Philippines",
+                preferredContact = "Email"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2003-07-09",
+                pronouns = "she/her",
+                gender = "Female",
+                occupation = "University Student"
+            ),
+            relationship = Relationship(
+                category = "Classmate",
+                workplaceOrSchool = "University of Manila",
+                howYouMet = "Class",
+                dateYouMet = "2024-08-19"
+            ),
+            interests = listOf(
+                "Reading",
+                "Movies",
+                "Writing"
+            ),
+            skills = listOf(
+                "Writing",
+                "Research",
+                "Presentation"
+            ),
+            notes = "Sofia is a classmate who often helps with research and school projects.",
+            interactions = listOf(
+                Interaction(
+                    id = 4001,
+                    type = "Message",
+                    date = "2026-09-20",
+                    time = "19:15",
+                    title = "School project discussion",
+                    details = "Discussed the requirements and tasks for the upcoming project."
+                ),
+                Interaction(
+                    id = 4002,
+                    type = "Meetup",
+                    date = "2026-09-05",
+                    time = "13:00",
+                    title = "Study session",
+                    details = "Worked together on school requirements at the library."
+                )
+            )
+        ),
+
+        Person(
+            id = 5,
+            firstName = "Ethan",
+            lastName = "Tan",
+            contact = Contact(
+                emails = listOf("ethan.tan@email.com"),
+                phones = listOf("+63 921 567 8901"),
+                location = "Cebu City, Philippines",
+                preferredContact = "Email"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2000-01-28",
+                pronouns = "he/him",
+                gender = "Male",
+                occupation = "Entrepreneur"
+            ),
+            relationship = Relationship(
+                category = "Professional",
+                workplaceOrSchool = "Tan Ventures",
+                howYouMet = "Networking event",
+                dateYouMet = "2025-04-15"
+            ),
+            interests = listOf(
+                "Business",
+                "Startups",
+                "Technology"
+            ),
+            skills = listOf(
+                "Business Strategy",
+                "Networking",
+                "Marketing"
+            ),
+            notes = "Ethan is interested in startups and frequently discusses business ideas.",
+            interactions = listOf(
+                Interaction(
+                    id = 5001,
+                    type = "Call",
+                    date = "2026-09-12",
+                    time = "16:30",
+                    title = "Startup discussion",
+                    details = "Discussed a potential collaboration and shared business ideas."
+                )
+            )
+        ),
+
+        Person(
+            id = 6,
+            firstName = "Lara",
+            lastName = "Villanueva",
+            contact = Contact(
+                emails = listOf("lara.villanueva@email.com"),
+                phones = listOf("+63 922 678 9012"),
+                location = "Laguna, Philippines",
+                preferredContact = "Phone"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2002-09-17",
+                pronouns = "she/her",
+                gender = "Female",
+                occupation = "Teacher"
+            ),
+            relationship = Relationship(
+                category = "Friend",
+                workplaceOrSchool = "Laguna High School",
+                howYouMet = "Mutual friend",
+                dateYouMet = "2020-12-06"
+            ),
+            interests = listOf(
+                "Teaching",
+                "Cooking",
+                "Travel"
+            ),
+            skills = listOf(
+                "Teaching",
+                "Public Speaking",
+                "Cooking"
+            ),
+            notes = "Lara enjoys traveling and trying new restaurants with friends.",
+            interactions = listOf(
+                Interaction(
+                    id = 6001,
+                    type = "Message",
+                    date = "2026-09-08",
+                    time = "21:00",
+                    title = "Planning a trip",
+                    details = "Talked about possible destinations for an upcoming weekend trip."
+                )
+            )
+        ),
+
+        Person(
+            id = 7,
+            firstName = "Noah",
+            lastName = "Lim",
+            contact = Contact(
+                emails = listOf("noah.lim@email.com"),
+                phones = listOf("+63 923 789 0123"),
+                location = "Taguig, Philippines",
+                preferredContact = "Email"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "1999-12-11",
+                pronouns = "they/them",
+                gender = "Non-binary",
+                occupation = "UX Designer"
+            ),
+            relationship = Relationship(
+                category = "Professional",
+                workplaceOrSchool = "Design Hub",
+                howYouMet = "Conference",
+                dateYouMet = "2024-10-22"
+            ),
+            interests = listOf(
+                "UX Design",
+                "Technology",
+                "Games"
+            ),
+            skills = listOf(
+                "UI Design",
+                "UX Research",
+                "Prototyping"
+            ),
+            notes = "Noah is someone to contact when discussing UI/UX and design projects.",
+            interactions = listOf(
+                Interaction(
+                    id = 7001,
+                    type = "Meeting",
+                    date = "2026-09-17",
+                    time = "11:00",
+                    title = "Design feedback",
+                    details = "Reviewed a prototype and discussed possible usability improvements."
+                )
+            )
+        ),
+
+        Person(
+            id = 8,
+            firstName = "Grace",
+            lastName = "Mendoza",
+            contact = Contact(
+                emails = listOf("grace.mendoza@email.com"),
+                phones = listOf("+63 924 890 1234"),
+                location = "Batangas, Philippines",
+                preferredContact = "Phone"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2001-04-30",
+                pronouns = "she/her",
+                gender = "Female",
+                occupation = "Content Writer"
+            ),
+            relationship = Relationship(
+                category = "Friend",
+                workplaceOrSchool = "Media Studio",
+                howYouMet = "Online community",
+                dateYouMet = "2022-11-13"
+            ),
+            interests = listOf(
+                "Writing",
+                "Books",
+                "Film"
+            ),
+            skills = listOf(
+                "Writing",
+                "Editing",
+                "Storytelling"
+            ),
+            notes = "Grace enjoys discussing books, films, and creative writing.",
+            interactions = listOf(
+                Interaction(
+                    id = 8001,
+                    type = "Message",
+                    date = "2026-09-19",
+                    time = "17:20",
+                    title = "Book recommendation",
+                    details = "Shared recommendations for books and documentaries."
+                )
+            )
+        ),
+
+        Person(
+            id = 9,
+            firstName = "Marco",
+            lastName = "Dela Cruz",
+            contact = Contact(
+                emails = listOf("marco.delacruz@email.com"),
+                phones = listOf("+63 925 901 2345"),
+                location = "Cavite, Philippines",
+                preferredContact = "Email"
+            ),
+            personalInfo = PersonalInfo(
+                birthday = "2000-06-25",
+                pronouns = "he/him",
+                gender = "Male",
+                occupation = "IT Specialist"
+            ),
+            relationship = Relationship(
+                category = "Family",
+                workplaceOrSchool = "IT Services Co.",
+                howYouMet = "Family",
+                dateYouMet = "2000-06-25"
+            ),
+            interests = listOf(
+                "Computers",
+                "Cars",
+                "Gaming"
+            ),
+            skills = listOf(
+                "IT Support",
+                "Networking",
+                "Hardware"
+            ),
+            notes = "Marco is a family member who is knowledgeable about computers and hardware.",
+            interactions = listOf(
+                Interaction(
+                    id = 9001,
+                    type = "Call",
+                    date = "2026-09-21",
+                    time = "20:00",
+                    title = "Tech help",
+                    details = "Called to discuss a computer issue and troubleshoot the problem."
+                )
+            )
+        )
+    )
+
+    fun getPeople(): List<Person> {
+        return mockPeople
+    }
+
+    fun getPersonById(id: Int): Person? {
+        return mockPeople.find { it.id == id }
+    }
+}
