@@ -72,24 +72,26 @@ class MainActivity : ComponentActivity() {
         ) {
             Row (
                 modifier = Modifier
-                    .fillMaxWidth(0.4f),
+                    .fillMaxWidth(0.5f),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Avatar
-                CircularAvatar("AR", Modifier)
+                CircularAvatar("DB", Modifier)
 
                 // Vertical [Name, and info]
                 Column(
                     modifier = Modifier
                 ) {
-                    Text(text = "Alex Rivera")
+                    Text(text = "Dennise Berja")
                     Text(text = "Classmate")
                 }
 
             }
+
+            // View button
             Button(onClick = { /*TODO*/ }) {
-                
+                Text(text = ">")
             }
         }
 
