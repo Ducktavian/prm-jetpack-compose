@@ -17,6 +17,9 @@ import com.example.prm.data.model.Person
 
 @Composable
 fun PersonCard(person: Person) {
+
+    val initials = "${person.firstName.take(1)}${person.lastName.take(1)}"
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,13 +35,13 @@ fun PersonCard(person: Person) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar
-            CircularAvatar("DB", Modifier)
+            CircularAvatar(initials = initials)
 
             // Vertical [Name, and info]
             Column(
                 modifier = Modifier
             ) {
-                Text(text = "$person.firstName $person.lastName")
+                Text(text = "${person.firstName} ${person.lastName}")
                 Text(text = person.relationship.category)
             }
 

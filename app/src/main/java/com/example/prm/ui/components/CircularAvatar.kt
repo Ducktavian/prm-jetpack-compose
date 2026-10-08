@@ -14,11 +14,10 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun CircularAvatar(
-    initials: String,
-    modifier: Modifier = Modifier,
+    initials: String
 ) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .size(48.dp)
             .background(
                 color = Color(0xFF6200EE), shape = CircleShape
