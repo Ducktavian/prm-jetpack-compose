@@ -1,6 +1,8 @@
 package com.example.prm.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,8 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,10 +30,20 @@ fun PersonCard(
 ) {
     val initials = "${person.firstName.take(1)}${person.lastName.take(1)}"
 
+    // Tracks if the card is currently being pressed by the user
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // Dynamic border and indicator color (Purple when pressed, Black otherwise)
+    val activeColor = Color(0xFF6200EE)
+    val currentColor = if (isPressed) activeColor else Color.Black
+
     OutlinedCard(
+        onClick = onViewClick,
+        interactionSource = interactionSource,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(2.dp, Color.Black)
+        border = BorderStroke(2.dp, currentColor)
     ) {
         Row(
             modifier = Modifier
@@ -42,8 +55,7 @@ fun PersonCard(
             // 1. Avatar
             CircularAvatar(initials = initials)
 
-            // 2. Name & Category column
-            // modifier.weight(1f) expands up to the button boundary
+            // 2. Name & Category
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -63,17 +75,13 @@ fun PersonCard(
                 )
             }
 
-            // 3. View Button (">" black with no background)
-            TextButton(
-                onClick = onViewClick
-            ) {
-                Text(
-                    text = ">",
-                    color = Color.Black,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            // 3. Arrow indicator
+            Text(
+                text = ">",
+                color = currentColor,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
