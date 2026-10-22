@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,9 +34,11 @@ fun PersonCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Dynamic border and indicator color (Purple when pressed, Black otherwise)
-    val activeColor = Color(0xFF6200EE)
-    val currentColor = if (isPressed) activeColor else Color.Black
+    // Dynamic theme-aware colors:
+    // Automatically Black in Light Mode, White in Dark Mode!
+    val defaultColor = MaterialTheme.colorScheme.onSurface
+    val activeColor = MaterialTheme.colorScheme.primary
+    val currentColor = if (isPressed) activeColor else defaultColor
 
     OutlinedCard(
         onClick = onViewClick,
@@ -61,6 +63,7 @@ fun PersonCard(
             ) {
                 Text(
                     text = "${person.firstName} ${person.lastName}",
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     maxLines = 1,
@@ -68,7 +71,7 @@ fun PersonCard(
                 )
                 Text(
                     text = person.relationship.category,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
