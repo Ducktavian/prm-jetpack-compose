@@ -17,7 +17,8 @@ import com.example.prm.ui.components.PersonCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonListScreen(
-    viewModel: PersonListViewModel
+    viewModel: PersonListViewModel,
+    onPersonClick: (Int) -> Unit = {}
 ) {
     val people = viewModel.people
 
@@ -27,18 +28,18 @@ fun PersonListScreen(
                 title = { Text(text = "People") }
             )
         }
-    ) {
-        innerPadding ->
+    ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(people) { person ->
-                PersonCard(person = person)
+                PersonCard(
+                    person = person,
+                    onViewClick = { onPersonClick(person.id) }
+                )
             }
         }
     }
-
-
 }
