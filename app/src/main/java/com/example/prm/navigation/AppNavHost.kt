@@ -15,25 +15,28 @@ import com.example.prm.ui.personlist.PersonListScreen
 import com.example.prm.ui.personlist.PersonListViewModel
 
 object Routes {
+    const val PERSON_ID = "personId"
     const val PERSON_LIST = "person_list"
-    const val PERSON_DETAIL = "person_detail/{personId}"
+    const val PERSON_DETAIL = "person_detail/{$PERSON_ID}"
     fun personDetail(personId: Int) = "person_detail/$personId"
 }
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
-    personListViewModel: PersonListViewModel = viewModel(),
-    personDetailViewModel: PersonDetailViewModel = viewModel()
+    navController: NavHostController = rememberNavController()
 ) {
     NavHost(
         navController = navController,
         startDestination = Routes.PERSON_LIST,
         modifier = modifier
     ) {
+        // ViewModels are created inside each destination, so each screen gets its own
+        // and it's cleared when that screen leaves the back stack.
+
         // 1. Person List
         composable(Routes.PERSON_LIST) {
+            val personListViewModel: PersonListViewModel = viewModel()
             PersonListScreen(
                 viewModel = personListViewModel,
                 onPersonClick = { personId ->
@@ -42,14 +45,13 @@ fun AppNavHost(
             )
         }
 
-        // 2. Person Detail
+        // 2. Person Detail (personId reaches the ViewModel via SavedStateHandle)
         composable(
             route = Routes.PERSON_DETAIL,
-            arguments = listOf(navArgument("personId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val personId = backStackEntry.arguments?.getInt("personId") ?: 0
+            arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
+        ) {
+            val personDetailViewModel: PersonDetailViewModel = viewModel()
             PersonDetailScreen(
-                personId = personId,
                 viewModel = personDetailViewModel,
                 onBackClick = {
                     navController.popBackStack()
