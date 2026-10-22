@@ -17,16 +17,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.prm.data.model.Person
+import com.example.prm.data.repository.PersonRepository
+import com.example.prm.ui.theme.PRMTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+// Entry point used by navigation: pulls the person from the ViewModel
 @Composable
 fun PersonDetailScreen(
     viewModel: PersonDetailViewModel,
     onBackClick: () -> Unit = {}
 ) {
-    val person = viewModel.person
+    PersonDetailContent(
+        person = viewModel.person,
+        onBackClick = onBackClick
+    )
+}
 
+// The actual UI. Takes plain data (no ViewModel) so it can be previewed.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PersonDetailContent(
+    person: Person?,
+    onBackClick: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,5 +97,21 @@ fun PersonDetailScreen(
             item { NotesSection(notes = person.notes) }
             item { InteractionsSection(interactions = person.interactions) }
         }
+    }
+}
+
+@Preview(showBackground = true, heightDp = 1800)
+@Composable
+fun PersonDetailPreview() {
+    PRMTheme {
+        PersonDetailContent(person = PersonRepository().getPeople().first())
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PersonDetailNotFoundPreview() {
+    PRMTheme {
+        PersonDetailContent(person = null)
     }
 }
