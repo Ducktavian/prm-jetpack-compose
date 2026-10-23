@@ -23,29 +23,59 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.prm.data.model.Interaction
 import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.ui.components.ConfirmationSheet
 import com.example.prm.ui.theme.PRMTheme
+import com.example.prm.util.formatDisplayDate
+import com.example.prm.util.formatDisplayTime
 
 // Entry point used by navigation: pulls the person from the ViewModel
-// and handles the delete confirmation.
+// and handles the delete confirmations (person and interaction).
 @Composable
 fun PersonDetailScreen(
     viewModel: PersonDetailViewModel,
     onBackClick: () -> Unit = {},
     onEditClick: (Int) -> Unit = {},
+    onAddInteractionClick: (Int) -> Unit = {},
+    // (personId, interactionId)
+    onEditInteractionClick: (Int, Int) -> Unit = { _, _ -> },
+    onInteractionDeleted: () -> Unit = {},
     onDeleted: () -> Unit = {}
 ) {
     val person = viewModel.person
     var showDeleteSheet by remember { mutableStateOf(false) }
+    // The interaction waiting for delete confirmation; null = no sheet
+    var interactionToDelete by remember { mutableStateOf<Interaction?>(null) }
 
     PersonDetailContent(
         person = person,
         onBackClick = onBackClick,
         onEditClick = onEditClick,
+        onAddInteractionClick = onAddInteractionClick,
+        onEditInteractionClick = { interaction ->
+            person?.let { onEditInteractionClick(it.id, interaction.id) }
+        },
+        onDeleteInteractionClick = { interactionToDelete = it },
         onDeleteClick = { showDeleteSheet = true }
     )
+
+    interactionToDelete?.let { interaction ->
+        val whenText = "${formatDisplayDate(interaction.date)} · ${formatDisplayTime(interaction.time)}"
+        ConfirmationSheet(
+            title = "Delete interaction?",
+            message = "This will permanently remove the ${interaction.title.lowercase()} " +
+                    "from $whenText. This cannot be undone.",
+            confirmText = "Delete Interaction",
+            onConfirm = {
+                interactionToDelete = null
+                viewModel.deleteInteraction(interaction.id)
+                onInteractionDeleted()
+            },
+            onDismiss = { interactionToDelete = null }
+        )
+    }
 
     if (showDeleteSheet && person != null) {
         val fullName = "${person.firstName} ${person.lastName}".trim()
@@ -71,6 +101,9 @@ fun PersonDetailContent(
     person: Person?,
     onBackClick: () -> Unit = {},
     onEditClick: (Int) -> Unit = {},
+    onAddInteractionClick: (Int) -> Unit = {},
+    onEditInteractionClick: (Interaction) -> Unit = {},
+    onDeleteInteractionClick: (Interaction) -> Unit = {},
     onDeleteClick: () -> Unit = {}
 ) {
     Scaffold(
@@ -130,7 +163,14 @@ fun PersonDetailContent(
             item { TagsSection(title = "Skills", tags = person.skills) }
             item { TagsSection(title = "Interests", tags = person.interests) }
             item { NotesSection(notes = person.notes) }
-            item { InteractionsSection(interactions = person.interactions) }
+            item {
+                InteractionsSection(
+                    interactions = person.interactions,
+                    onAddClick = { onAddInteractionClick(person.id) },
+                    onEditClick = onEditInteractionClick,
+                    onDeleteClick = onDeleteInteractionClick
+                )
+            }
         }
     }
 }

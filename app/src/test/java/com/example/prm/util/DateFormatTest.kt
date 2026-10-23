@@ -69,6 +69,21 @@ class DateFormatTest {
     }
 
     @Test
+    fun parseTime24h_validAndInvalid() {
+        assertEquals(20 to 30, parseTime24h("20:30"))
+        assertEquals(0 to 5, parseTime24h("00:05"))
+        assertNull(parseTime24h(""))
+        assertNull(parseTime24h("25:00"))
+        assertNull(parseTime24h("evening"))
+    }
+
+    @Test
+    fun formatTime24h_padsWithZeros() {
+        assertEquals("08:05", formatTime24h(8, 5))
+        assertEquals("20:30", formatTime24h(20, 30))
+    }
+
+    @Test
     fun formatDisplayTime_invalidInput_returnsInputUnchanged() {
         assertEquals("25:99", formatDisplayTime("25:99"))
         assertEquals("evening", formatDisplayTime("evening"))

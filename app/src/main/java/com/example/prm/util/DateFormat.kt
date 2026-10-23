@@ -35,6 +35,20 @@ fun utcMillisToIsoDate(millis: Long): String {
     return utcIsoFormat().format(Date(millis))
 }
 
+// "20:30" -> (20, 30). null if blank or not a valid 24-hour time.
+fun parseTime24h(time24h: String): Pair<Int, Int>? {
+    val parts = time24h.split(":")
+    if (parts.size != 2) return null
+    val hour = parts[0].toIntOrNull() ?: return null
+    val minute = parts[1].toIntOrNull() ?: return null
+    if (hour !in 0..23 || minute !in 0..59) return null
+    return hour to minute
+}
+
+// (8, 5) -> "08:05", the format interactions store
+fun formatTime24h(hour: Int, minute: Int): String =
+    String.format(Locale.US, "%02d:%02d", hour, minute)
+
 private fun utcIsoFormat() = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
     isLenient = false
     timeZone = TimeZone.getTimeZone("UTC")

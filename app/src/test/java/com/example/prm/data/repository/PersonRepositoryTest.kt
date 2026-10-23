@@ -37,6 +37,57 @@ class PersonRepositoryTest {
     }
 
     @Test
+    fun addInteraction_givesUniqueIdAndSortsNewestFirst() {
+        val person = originalPeople.first()
+        val maxId = originalPeople.flatMap { it.interactions }.maxOf { it.id }
+        val old = person.interactions.first().copy(id = 0, date = "2000-01-01", title = "Old")
+
+        val newId = PersonRepository.addInteraction(person.id, old)
+
+        assertEquals(maxId + 1, newId)
+        val interactions = PersonRepository.getPersonById(person.id)!!.interactions
+        assertEquals(person.interactions.size + 1, interactions.size)
+        // Oldest date ends up last
+        assertEquals("Old", interactions.last().title)
+        // Other people untouched
+        assertEquals(originalPeople.drop(1), PersonRepository.getPeople().drop(1))
+    }
+
+    @Test
+    fun addInteraction_unknownPerson_returnsNull() {
+        val interaction = originalPeople.first().interactions.first()
+
+        assertNull(PersonRepository.addInteraction(-1, interaction))
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
+    fun updateInteraction_replacesItAndKeepsOrder() {
+        val person = originalPeople.first()
+        val target = person.interactions.last()
+
+        PersonRepository.updateInteraction(person.id, target.copy(title = "Renamed", date = "2099-01-01"))
+
+        val interactions = PersonRepository.getPersonById(person.id)!!.interactions
+        assertEquals(person.interactions.size, interactions.size)
+        // New date is the newest, so it moves to the top
+        assertEquals("Renamed", interactions.first().title)
+        assertEquals(target.id, interactions.first().id)
+    }
+
+    @Test
+    fun deleteInteraction_removesOnlyThatOne() {
+        val person = originalPeople.first()
+        val target = person.interactions.first()
+
+        PersonRepository.deleteInteraction(person.id, target.id)
+
+        val interactions = PersonRepository.getPersonById(person.id)!!.interactions
+        assertEquals(person.interactions.drop(1), interactions)
+        assertEquals(originalPeople.drop(1), PersonRepository.getPeople().drop(1))
+    }
+
+    @Test
     fun deletePerson_removesOnlyThatPerson() {
         val target = originalPeople.first()
 

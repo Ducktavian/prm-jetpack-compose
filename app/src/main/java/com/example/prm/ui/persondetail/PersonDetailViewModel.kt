@@ -38,6 +38,11 @@ class PersonDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         }
     }
 
+    fun deleteInteraction(interactionId: Int) {
+        val id = personId ?: return
+        personRepository.deleteInteraction(id, interactionId)
+    }
+
     fun deletePerson() {
         val id = personId ?: return
         isDeleted = true

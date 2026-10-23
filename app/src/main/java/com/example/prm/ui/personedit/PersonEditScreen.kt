@@ -4,29 +4,16 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -46,8 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.prm.R
 import com.example.prm.data.repository.PersonRepository
+import com.example.prm.ui.components.BottomActionBar
 import com.example.prm.ui.components.ConfirmationSheet
 import com.example.prm.ui.components.DateField
+import com.example.prm.ui.components.DiscardChangesDialog
 import com.example.prm.ui.components.DropdownField
 import com.example.prm.ui.components.FormSectionHeader
 import com.example.prm.ui.components.FormTextField
@@ -131,28 +120,13 @@ fun PersonEditScreen(
     }
 
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text(text = "Discard changes?") },
-            text = { Text(text = "Your edits to this person won't be saved.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardDialog = false
-                        onDone()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(text = "Discard")
-                }
+        DiscardChangesDialog(
+            message = "Your edits to this person won't be saved.",
+            onDiscard = {
+                showDiscardDialog = false
+                onDone()
             },
-            dismissButton = {
-                TextButton(onClick = { showDiscardDialog = false }) {
-                    Text(text = "Keep editing")
-                }
-            }
+            onDismiss = { showDiscardDialog = false }
         )
     }
 }
@@ -191,7 +165,8 @@ fun PersonEditContent(
         },
         bottomBar = {
             if (isPersonFound) {
-                SaveBar(
+                BottomActionBar(
+                    text = "Save",
                     onClick = {
                         if (!onSaveClick()) {
                             // Required fields are at the top; scroll up so the errors are visible
@@ -396,28 +371,6 @@ private fun RepeatingFields(
         }
         TextButton(onClick = onAdd) {
             Text(text = "+ Add ${label.lowercase()}", fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-// Full-width Save button pinned to the bottom; rises above the keyboard when it opens
-@Composable
-private fun SaveBar(onClick: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        Column(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
-        ) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Button(
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(text = "Save", fontWeight = FontWeight.Bold)
-            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.prm.ui.persondetail
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -8,16 +9,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.prm.R
 import com.example.prm.data.model.Contact
 import com.example.prm.data.model.Interaction
 import com.example.prm.data.model.Person
@@ -139,7 +150,9 @@ fun NotesSection(notes: String) {
 @Composable
 fun InteractionsSection(
     interactions: List<Interaction>,
-    onAddClick: () -> Unit = {}
+    onAddClick: () -> Unit = {},
+    onEditClick: (Interaction) -> Unit = {},
+    onDeleteClick: (Interaction) -> Unit = {}
 ) {
     SectionCard(
         title = "Interactions",
@@ -161,36 +174,97 @@ fun InteractionsSection(
                 if (index > 0) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
-                InteractionItem(interaction = interaction)
+                InteractionItem(
+                    interaction = interaction,
+                    onEditClick = { onEditClick(interaction) },
+                    onDeleteClick = { onDeleteClick(interaction) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun InteractionItem(interaction: Interaction) {
-    Column(
+private fun InteractionItem(
+    interaction: Interaction,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+            .padding(start = 12.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        Text(
-            text = interaction.title,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp
-        )
-        Text(
-            text = "${formatDisplayDate(interaction.date)} · ${formatDisplayTime(interaction.time)}",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 12.sp
-        )
-        Text(
-            text = interaction.details,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 14.sp
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = interaction.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+            Text(
+                text = "${formatDisplayDate(interaction.date)} · ${formatDisplayTime(interaction.time)}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
+            )
+            // Notes are optional, so skip the empty line when there are none
+            if (interaction.details.isNotBlank()) {
+                Text(
+                    text = interaction.details,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp
+                )
+            }
+        }
+        InteractionMenu(onEditClick = onEditClick, onDeleteClick = onDeleteClick)
+    }
+}
+
+// "..." button that opens Edit / Delete for one interaction
+@Composable
+private fun InteractionMenu(
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                painter = painterResource(R.drawable.ic_more_horiz),
+                contentDescription = "Interaction options",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(text = "Edit", fontWeight = FontWeight.Bold) },
+                onClick = {
+                    expanded = false
+                    onEditClick()
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = "Delete",
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                onClick = {
+                    expanded = false
+                    onDeleteClick()
+                }
+            )
+        }
     }
 }
 

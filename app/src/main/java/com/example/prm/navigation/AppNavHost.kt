@@ -26,6 +26,8 @@ import com.example.prm.ui.personedit.PersonEditViewModel
 import com.example.prm.ui.personlist.PersonListScreen
 import com.example.prm.ui.personlist.PersonListViewModel
 import com.example.prm.ui.components.MessageSnackbar
+import com.example.prm.ui.interactionform.InteractionFormScreen
+import com.example.prm.ui.interactionform.InteractionFormViewModel
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -37,6 +39,12 @@ object Routes {
     fun personEdit(personId: Int) = "person_edit/$personId"
     // No personId: the edit form opens blank and saving adds a new person
     const val PERSON_ADD = "person_add"
+    const val INTERACTION_ADD = "interaction_add/{$PERSON_ID}"
+    fun interactionAdd(personId: Int) = "interaction_add/$personId"
+    const val INTERACTION_ID = "interactionId"
+    const val INTERACTION_EDIT = "interaction_edit/{$PERSON_ID}/{$INTERACTION_ID}"
+    fun interactionEdit(personId: Int, interactionId: Int) =
+        "interaction_edit/$personId/$interactionId"
 }
 
 @Composable
@@ -89,6 +97,16 @@ fun AppNavHost(
                     onEditClick = { personId ->
                         navController.navigate(Routes.personEdit(personId))
                     },
+                    onAddInteractionClick = { personId ->
+                        navController.navigate(Routes.interactionAdd(personId))
+                    },
+                    onEditInteractionClick = { personId, interactionId ->
+                        navController.navigate(Routes.interactionEdit(personId, interactionId))
+                    },
+                    // Stays on Detail (which already updated itself); just confirm it
+                    onInteractionDeleted = {
+                        showMessage("Interaction deleted successfully.")
+                    },
                     // Person is gone, so go back to the list (which already updated itself)
                     onDeleted = {
                         navController.popBackStack()
@@ -127,6 +145,45 @@ fun AppNavHost(
                     onSaved = {
                         navController.popBackStack()
                         showMessage("Person added successfully.")
+                    }
+                )
+            }
+
+            // 5. Add Interaction (saving returns to Detail, which shows the new interaction)
+            composable(
+                route = Routes.INTERACTION_ADD,
+                arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
+            ) {
+                val interactionFormViewModel: InteractionFormViewModel = viewModel()
+                InteractionFormScreen(
+                    viewModel = interactionFormViewModel,
+                    onDone = {
+                        navController.popBackStack()
+                    },
+                    onSaved = {
+                        navController.popBackStack()
+                        showMessage("Interaction added successfully.")
+                    }
+                )
+            }
+
+            // 6. Edit Interaction (same form as Add, filled in; saving returns to Detail)
+            composable(
+                route = Routes.INTERACTION_EDIT,
+                arguments = listOf(
+                    navArgument(Routes.PERSON_ID) { type = NavType.IntType },
+                    navArgument(Routes.INTERACTION_ID) { type = NavType.IntType }
+                )
+            ) {
+                val interactionFormViewModel: InteractionFormViewModel = viewModel()
+                InteractionFormScreen(
+                    viewModel = interactionFormViewModel,
+                    onDone = {
+                        navController.popBackStack()
+                    },
+                    onSaved = {
+                        navController.popBackStack()
+                        showMessage("Interaction updated successfully.")
                     }
                 )
             }

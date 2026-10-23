@@ -4,7 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -78,23 +80,27 @@ fun ConfirmationSheet(
                     onClick = { hideThen(onDismiss) },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp)
+                        // Min height (not fixed) so long labels can wrap instead of clipping
+                        .heightIn(min = 48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                 ) {
-                    Text(text = dismissText, fontWeight = FontWeight.Bold)
+                    Text(text = dismissText, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
                 Button(
                     onClick = { hideThen(onConfirm) },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
+                        // Min height (not fixed) so long labels can wrap instead of clipping
+                        .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = confirmColor,
                         contentColor = onConfirmColor
                     )
                 ) {
-                    Text(text = confirmText, fontWeight = FontWeight.Bold)
+                    Text(text = confirmText, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
             }
         }

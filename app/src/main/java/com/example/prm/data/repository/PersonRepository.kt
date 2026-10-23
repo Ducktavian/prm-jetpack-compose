@@ -475,6 +475,58 @@ object PersonRepository {
         return newId
     }
 
+    // Adds an interaction to a person, with the next free interaction id (the id on the
+    // passed interaction is ignored). Keeps the list newest first. Returns the new id,
+    // or null if the person isn't found.
+    fun addInteraction(personId: Int, interaction: Interaction): Int? {
+        if (getPersonById(personId) == null) return null
+        var newId = 0
+        _people.update { list ->
+            newId = (list.flatMap { it.interactions }.maxOfOrNull { it.id } ?: 0) + 1
+            list.map { person ->
+                if (person.id != personId) {
+                    person
+                } else {
+                    // "yyyy-MM-dd HH:mm" sorts correctly as plain text
+                    val updated = (person.interactions + interaction.copy(id = newId))
+                        .sortedByDescending { "${it.date} ${it.time}" }
+                    person.copy(interactions = updated)
+                }
+            }
+        }
+        return newId
+    }
+
+    // Replaces the interaction with the same id on that person; keeps the list newest first.
+    // Does nothing if the person or interaction isn't found.
+    fun updateInteraction(personId: Int, interaction: Interaction) {
+        updateInteractions(personId) { interactions ->
+            interactions.map { if (it.id == interaction.id) interaction else it }
+        }
+    }
+
+    // Removes one interaction from that person. Does nothing if not found.
+    fun deleteInteraction(personId: Int, interactionId: Int) {
+        updateInteractions(personId) { interactions ->
+            interactions.filterNot { it.id == interactionId }
+        }
+    }
+
+    private fun updateInteractions(personId: Int, change: (List<Interaction>) -> List<Interaction>) {
+        _people.update { list ->
+            list.map { person ->
+                if (person.id != personId) {
+                    person
+                } else {
+                    person.copy(
+                        interactions = change(person.interactions)
+                            .sortedByDescending { "${it.date} ${it.time}" }
+                    )
+                }
+            }
+        }
+    }
+
     // Removes the person (and their interactions, which live inside Person).
     // Does nothing if the id isn't found.
     fun deletePerson(id: Int) {
