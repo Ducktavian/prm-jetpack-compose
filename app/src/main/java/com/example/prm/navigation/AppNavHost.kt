@@ -62,6 +62,10 @@ fun AppNavHost(
                 },
                 onEditClick = { personId ->
                     navController.navigate(Routes.personEdit(personId))
+                },
+                // Person is gone, so go back to the list (which already updated itself)
+                onDeleted = {
+                    navController.popBackStack()
                 }
             )
         }

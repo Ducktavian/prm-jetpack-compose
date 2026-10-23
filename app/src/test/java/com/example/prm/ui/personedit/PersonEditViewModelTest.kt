@@ -17,16 +17,17 @@ class PersonEditViewModelTest {
     private lateinit var originalPeople: List<Person>
     private lateinit var person: Person
 
+    // PersonRepository is a shared object, so start and end each test with the sample data
     @Before
     fun setUp() {
+        PersonRepository.resetToSampleData()
         originalPeople = PersonRepository.getPeople()
         person = originalPeople.first()
     }
 
-    // PersonRepository is a shared object, so undo any saves
     @After
     fun tearDown() {
-        originalPeople.forEach { PersonRepository.updatePerson(it) }
+        PersonRepository.resetToSampleData()
     }
 
     private fun viewModelFor(personId: Int) =

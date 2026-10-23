@@ -463,4 +463,15 @@ object PersonRepository {
             list.map { if (it.id == person.id) person else it }
         }
     }
+
+    // Removes the person (and their interactions, which live inside Person).
+    // Does nothing if the id isn't found.
+    fun deletePerson(id: Int) {
+        _people.update { list -> list.filterNot { it.id == id } }
+    }
+
+    // Puts the mock data back. For tests only (internal = not visible outside this module).
+    internal fun resetToSampleData() {
+        _people.value = mockPeople
+    }
 }

@@ -14,6 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -21,20 +25,43 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
+import com.example.prm.ui.components.ConfirmationSheet
 import com.example.prm.ui.theme.PRMTheme
 
 // Entry point used by navigation: pulls the person from the ViewModel
+// and handles the delete confirmation.
 @Composable
 fun PersonDetailScreen(
     viewModel: PersonDetailViewModel,
     onBackClick: () -> Unit = {},
-    onEditClick: (Int) -> Unit = {}
+    onEditClick: (Int) -> Unit = {},
+    onDeleted: () -> Unit = {}
 ) {
+    val person = viewModel.person
+    var showDeleteSheet by remember { mutableStateOf(false) }
+
     PersonDetailContent(
-        person = viewModel.person,
+        person = person,
         onBackClick = onBackClick,
-        onEditClick = onEditClick
+        onEditClick = onEditClick,
+        onDeleteClick = { showDeleteSheet = true }
     )
+
+    if (showDeleteSheet && person != null) {
+        val fullName = "${person.firstName} ${person.lastName}".trim()
+        ConfirmationSheet(
+            title = "Delete $fullName?",
+            message = "This will permanently remove $fullName and all their " +
+                    "interaction history. This cannot be undone.",
+            confirmText = "Delete",
+            onConfirm = {
+                showDeleteSheet = false
+                viewModel.deletePerson()
+                onDeleted()
+            },
+            onDismiss = { showDeleteSheet = false }
+        )
+    }
 }
 
 // The actual UI. Takes plain data (no ViewModel) so it can be previewed.
@@ -43,7 +70,8 @@ fun PersonDetailScreen(
 fun PersonDetailContent(
     person: Person?,
     onBackClick: () -> Unit = {},
-    onEditClick: (Int) -> Unit = {}
+    onEditClick: (Int) -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -62,7 +90,8 @@ fun PersonDetailContent(
                         Text(text = "Edit", fontWeight = FontWeight.Bold)
                     }
                     TextButton(
-                        onClick = { /* Handle delete action */ },
+                        onClick = onDeleteClick,
+                        enabled = person != null,
                         colors = ButtonDefaults.textButtonColors(
                             contentColor = MaterialTheme.colorScheme.error
                         )

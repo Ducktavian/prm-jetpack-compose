@@ -1,23 +1,53 @@
 package com.example.prm.data.repository
 
 import com.example.prm.data.model.Person
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
 class PersonRepositoryTest {
     private lateinit var originalPeople: List<Person>
 
-    // PersonRepository is a shared object, so put back whatever a test changed
+    // PersonRepository is a shared object, so start and end each test with the sample data
     @Before
     fun setUp() {
+        PersonRepository.resetToSampleData()
         originalPeople = PersonRepository.getPeople()
     }
 
     @After
     fun tearDown() {
-        originalPeople.forEach { PersonRepository.updatePerson(it) }
+        PersonRepository.resetToSampleData()
+    }
+
+    @Test
+    fun deletePerson_removesOnlyThatPerson() {
+        val target = originalPeople.first()
+
+        PersonRepository.deletePerson(target.id)
+
+        assertNull(PersonRepository.getPersonById(target.id))
+        assertEquals(originalPeople.drop(1), PersonRepository.getPeople())
+    }
+
+    @Test
+    fun deletePerson_unknownId_changesNothing() {
+        PersonRepository.deletePerson(-1)
+
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
+    fun deletePerson_observePersonEmitsNull() = runBlocking {
+        val target = originalPeople.first()
+
+        PersonRepository.deletePerson(target.id)
+
+        assertNull(PersonRepository.observePerson(target.id).first())
     }
 
     @Test

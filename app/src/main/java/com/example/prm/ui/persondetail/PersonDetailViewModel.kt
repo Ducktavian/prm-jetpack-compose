@@ -23,11 +23,24 @@ class PersonDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     var person by mutableStateOf(personId?.let { personRepository.getPersonById(it) })
         private set
 
+    // Set once this screen deletes the person
+    private var isDeleted = false
+
     init {
         if (personId != null) {
             viewModelScope.launch {
-                personRepository.observePerson(personId).collect { person = it }
+                personRepository.observePerson(personId).collect {
+                    // After deleting, keep showing the last person while the screen
+                    // animates away, instead of flashing "Person not found"
+                    if (it != null || !isDeleted) person = it
+                }
             }
         }
+    }
+
+    fun deletePerson() {
+        val id = personId ?: return
+        isDeleted = true
+        personRepository.deletePerson(id)
     }
 }
