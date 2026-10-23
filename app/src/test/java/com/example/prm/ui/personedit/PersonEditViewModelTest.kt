@@ -79,6 +79,20 @@ class PersonEditViewModelTest {
     }
 
     @Test
+    fun validate_checksWithoutSaving() {
+        val viewModel = viewModelFor(person.id)
+        viewModel.onFormChange { copy(firstName = "Edited") }
+
+        // Valid form: validate passes but nothing is saved until save() is called
+        assertTrue(viewModel.validate())
+        assertEquals(person, PersonRepository.getPersonById(person.id))
+
+        viewModel.onFormChange { copy(firstName = "") }
+        assertFalse(viewModel.validate())
+        assertNotNull(viewModel.errors.firstName)
+    }
+
+    @Test
     fun phones_addEditRemove() {
         val viewModel = viewModelFor(person.id)
         val startCount = viewModel.form.phones.size

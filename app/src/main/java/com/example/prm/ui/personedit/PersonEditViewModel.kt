@@ -51,13 +51,19 @@ class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         onFormChange { copy(emails = emails.replaceAt(index, value)) }
     fun removeEmail(index: Int) = onFormChange { copy(emails = emails.withoutIndex(index)) }
 
+    // Checks required fields and shows any errors. Returns true if the form is valid.
+    // Called when Save is tapped, before the "Save changes?" confirmation.
+    fun validate(): Boolean {
+        saveAttempted = true
+        errors = form.validate()
+        return !errors.hasErrors
+    }
+
     // Validates, then saves to the repository.
     // Returns true if saved (the screen then navigates back), false if there are errors.
     fun save(): Boolean {
         val person = original ?: return false
-        saveAttempted = true
-        errors = form.validate()
-        if (errors.hasErrors) return false
+        if (!validate()) return false
 
         personRepository.updatePerson(form.applyTo(person))
         return true

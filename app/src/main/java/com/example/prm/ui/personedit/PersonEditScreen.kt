@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.prm.R
 import com.example.prm.data.repository.PersonRepository
+import com.example.prm.ui.components.ConfirmationSheet
 import com.example.prm.ui.components.DateField
 import com.example.prm.ui.components.DropdownField
 import com.example.prm.ui.components.FormSectionHeader
@@ -58,9 +59,30 @@ import kotlinx.coroutines.launch
 @Composable
 fun PersonEditScreen(
     viewModel: PersonEditViewModel,
-    onDone: () -> Unit = {}
+    // Leave without saving (Cancel / back, or Save with nothing changed)
+    onDone: () -> Unit = {},
+    // Leave after a confirmed save
+    onSaved: () -> Unit = {}
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showSaveSheet by remember { mutableStateOf(false) }
+
+    // Save tapped: show errors if invalid, otherwise ask for confirmation.
+    // Returns false when there are errors (so the form scrolls up to them).
+    val onSaveClick: () -> Boolean = {
+        when {
+            !viewModel.validate() -> false
+            // Nothing to save; just leave, no confirmation or message
+            !viewModel.hasChanges -> {
+                onDone()
+                true
+            }
+            else -> {
+                showSaveSheet = true
+                true
+            }
+        }
+    }
 
     // Ask before throwing away edits; leave right away if nothing changed
     val requestClose: () -> Unit = {
@@ -85,10 +107,23 @@ fun PersonEditScreen(
         onAddEmail = viewModel::addEmail,
         onEmailChange = viewModel::onEmailChange,
         onRemoveEmail = viewModel::removeEmail,
-        onSave = viewModel::save,
-        onSaved = onDone,
+        onSaveClick = onSaveClick,
         onCancel = requestClose
     )
+
+    if (showSaveSheet) {
+        ConfirmationSheet(
+            title = "Save changes?",
+            message = "This will update the person's information with your changes.",
+            confirmText = "Save Changes",
+            destructive = false,
+            onConfirm = {
+                showSaveSheet = false
+                if (viewModel.save()) onSaved()
+            },
+            onDismiss = { showSaveSheet = false }
+        )
+    }
 
     if (showDiscardDialog) {
         AlertDialog(
@@ -131,9 +166,8 @@ fun PersonEditContent(
     onAddEmail: () -> Unit,
     onEmailChange: (Int, String) -> Unit,
     onRemoveEmail: (Int) -> Unit,
-    // Returns true if saved
-    onSave: () -> Boolean,
-    onSaved: () -> Unit,
+    // Returns false if the form has errors
+    onSaveClick: () -> Boolean,
     onCancel: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -154,9 +188,7 @@ fun PersonEditContent(
             if (isPersonFound) {
                 SaveBar(
                     onClick = {
-                        if (onSave()) {
-                            onSaved()
-                        } else {
+                        if (!onSaveClick()) {
                             // Required fields are at the top; scroll up so the errors are visible
                             scope.launch { scrollState.animateScrollTo(0) }
                         }
@@ -387,8 +419,7 @@ fun PersonEditPreview() {
             onAddEmail = {},
             onEmailChange = { _, _ -> },
             onRemoveEmail = {},
-            onSave = { true },
-            onSaved = {},
+            onSaveClick = { true },
             onCancel = {}
         )
     }

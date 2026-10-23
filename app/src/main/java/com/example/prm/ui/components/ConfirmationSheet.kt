@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-// Bottom sheet asking the user to confirm a destructive action (e.g. delete).
+// Bottom sheet asking the user to confirm an action (e.g. delete, save changes).
 // Dims the screen behind it; tapping outside or Cancel dismisses it.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,8 +33,13 @@ fun ConfirmationSheet(
     confirmText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    dismissText: String = "Cancel"
+    dismissText: String = "Cancel",
+    // true = red confirm button (delete); false = purple (save)
+    destructive: Boolean = true
 ) {
+    val confirmColor = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val onConfirmColor = if (destructive) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
@@ -85,8 +90,8 @@ fun ConfirmationSheet(
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
+                        containerColor = confirmColor,
+                        contentColor = onConfirmColor
                     )
                 ) {
                     Text(text = confirmText, fontWeight = FontWeight.Bold)

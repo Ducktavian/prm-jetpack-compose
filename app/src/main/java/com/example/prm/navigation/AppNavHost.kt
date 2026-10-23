@@ -103,6 +103,10 @@ fun AppNavHost(
                     viewModel = personEditViewModel,
                     onDone = {
                         navController.popBackStack()
+                    },
+                    onSaved = {
+                        navController.popBackStack()
+                        showMessage("Changes saved successfully.")
                     }
                 )
             }
