@@ -25,6 +25,18 @@ class PersonRepositoryTest {
     }
 
     @Test
+    fun addPerson_appendsWithNextFreeId() {
+        val maxId = originalPeople.maxOf { it.id }
+
+        val newId = PersonRepository.addPerson(originalPeople.first().copy(id = 999, firstName = "New"))
+
+        assertEquals(maxId + 1, newId)
+        assertEquals(originalPeople.size + 1, PersonRepository.getPeople().size)
+        assertEquals("New", PersonRepository.getPersonById(newId)?.firstName)
+        assertNull(PersonRepository.getPersonById(999))
+    }
+
+    @Test
     fun deletePerson_removesOnlyThatPerson() {
         val target = originalPeople.first()
 

@@ -72,6 +72,11 @@ fun PersonEditScreen(
     val onSaveClick: () -> Boolean = {
         when {
             !viewModel.validate() -> false
+            // Adding: save right away, no confirmation
+            viewModel.isNewPerson -> {
+                if (viewModel.save()) onSaved()
+                true
+            }
             // Nothing to save; just leave, no confirmation or message
             !viewModel.hasChanges -> {
                 onDone()
@@ -224,6 +229,7 @@ fun PersonEditContent(
                 label = "First name",
                 value = form.firstName,
                 onValueChange = { onFormChange { copy(firstName = it) } },
+                placeholder = "e.g. Alex",
                 required = true,
                 error = errors.firstName,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
@@ -232,6 +238,7 @@ fun PersonEditContent(
                 label = "Last name",
                 value = form.lastName,
                 onValueChange = { onFormChange { copy(lastName = it) } },
+                placeholder = "e.g. Rivera",
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
             )
             DropdownField(
@@ -260,12 +267,14 @@ fun PersonEditContent(
             FormTextField(
                 label = "Workplace or school",
                 value = form.workplaceOrSchool,
-                onValueChange = { onFormChange { copy(workplaceOrSchool = it) } }
+                onValueChange = { onFormChange { copy(workplaceOrSchool = it) } },
+                placeholder = "e.g. Tech Solutions Inc."
             )
             FormTextField(
                 label = "How you met",
                 value = form.howYouMet,
-                onValueChange = { onFormChange { copy(howYouMet = it) } }
+                onValueChange = { onFormChange { copy(howYouMet = it) } },
+                placeholder = "e.g. College, conference, mutual friend"
             )
             DateField(
                 label = "Date you met",
@@ -283,17 +292,20 @@ fun PersonEditContent(
             FormTextField(
                 label = "Pronouns",
                 value = form.pronouns,
-                onValueChange = { onFormChange { copy(pronouns = it) } }
+                onValueChange = { onFormChange { copy(pronouns = it) } },
+                placeholder = "e.g. She/her, He/him, They/them"
             )
             FormTextField(
                 label = "Gender",
                 value = form.gender,
-                onValueChange = { onFormChange { copy(gender = it) } }
+                onValueChange = { onFormChange { copy(gender = it) } },
+                placeholder = "Optional"
             )
             FormTextField(
                 label = "Occupation",
                 value = form.occupation,
-                onValueChange = { onFormChange { copy(occupation = it) } }
+                onValueChange = { onFormChange { copy(occupation = it) } },
+                placeholder = "e.g. Software engineer"
             )
 
             // 4. Contact & more
@@ -301,6 +313,7 @@ fun PersonEditContent(
             RepeatingFields(
                 label = "Phone",
                 values = form.phones,
+                placeholder = "+63 917 000 0000",
                 keyboardType = KeyboardType.Phone,
                 onValueChange = onPhoneChange,
                 onRemove = onRemovePhone,
@@ -309,6 +322,7 @@ fun PersonEditContent(
             RepeatingFields(
                 label = "Email",
                 values = form.emails,
+                placeholder = "name@example.com",
                 keyboardType = KeyboardType.Email,
                 onValueChange = onEmailChange,
                 onRemove = onRemoveEmail,
@@ -317,7 +331,8 @@ fun PersonEditContent(
             FormTextField(
                 label = "Location",
                 value = form.location,
-                onValueChange = { onFormChange { copy(location = it) } }
+                onValueChange = { onFormChange { copy(location = it) } },
+                placeholder = "e.g. Quezon City, Philippines"
             )
             DropdownField(
                 label = "Preferred contact",
@@ -329,18 +344,19 @@ fun PersonEditContent(
                 label = "Skills",
                 value = form.skills,
                 onValueChange = { onFormChange { copy(skills = it) } },
-                placeholder = "Separate with commas, e.g. UI/UX, Figma"
+                placeholder = "e.g. React, Public Speaking"
             )
             FormTextField(
                 label = "Interests",
                 value = form.interests,
                 onValueChange = { onFormChange { copy(interests = it) } },
-                placeholder = "Separate with commas, e.g. Typography, Design"
+                placeholder = "e.g. Photography, Hiking"
             )
             FormTextField(
                 label = "Notes",
                 value = form.notes,
                 onValueChange = { onFormChange { copy(notes = it) } },
+                placeholder = "Anything worth remembering...",
                 singleLine = false,
                 minLines = 3
             )
@@ -353,6 +369,7 @@ fun PersonEditContent(
 private fun RepeatingFields(
     label: String,
     values: List<String>,
+    placeholder: String,
     keyboardType: KeyboardType,
     onValueChange: (Int, String) -> Unit,
     onRemove: (Int) -> Unit,
@@ -365,6 +382,7 @@ private fun RepeatingFields(
                 label = if (values.size > 1) "$label ${index + 1}" else label,
                 value = value,
                 onValueChange = { onValueChange(index, it) },
+                placeholder = placeholder,
                 keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 trailingIcon = {
                     IconButton(onClick = { onRemove(index) }) {

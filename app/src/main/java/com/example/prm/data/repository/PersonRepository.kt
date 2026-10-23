@@ -464,6 +464,17 @@ object PersonRepository {
         }
     }
 
+    // Adds a new person with the next free id (the id on the passed person is ignored).
+    // Returns the new id.
+    fun addPerson(person: Person): Int {
+        var newId = 0
+        _people.update { list ->
+            newId = (list.maxOfOrNull { it.id } ?: 0) + 1
+            list + person.copy(id = newId)
+        }
+        return newId
+    }
+
     // Removes the person (and their interactions, which live inside Person).
     // Does nothing if the id isn't found.
     fun deletePerson(id: Int) {

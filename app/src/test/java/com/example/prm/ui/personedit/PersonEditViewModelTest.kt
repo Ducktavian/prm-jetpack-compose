@@ -93,6 +93,48 @@ class PersonEditViewModelTest {
     }
 
     @Test
+    fun addMode_startsBlankWithFriendSelected() {
+        val viewModel = PersonEditViewModel(SavedStateHandle())
+
+        assertTrue(viewModel.isNewPerson)
+        assertTrue(viewModel.isPersonFound)
+        assertEquals("", viewModel.form.firstName)
+        assertEquals("Friend", viewModel.form.category)
+        assertEquals(listOf(""), viewModel.form.phones)
+        assertFalse(viewModel.hasChanges)
+    }
+
+    @Test
+    fun addMode_saveAddsNewPerson() {
+        val viewModel = PersonEditViewModel(SavedStateHandle())
+        viewModel.onFormChange {
+            copy(firstName = "Jane", lastName = "Doe", skills = "Kotlin", phones = listOf("0917"))
+        }
+
+        assertTrue(viewModel.hasChanges)
+        assertTrue(viewModel.save())
+
+        val people = PersonRepository.getPeople()
+        assertEquals(originalPeople.size + 1, people.size)
+        val added = people.last()
+        assertEquals("Jane", added.firstName)
+        assertEquals("Friend", added.relationship.category)
+        assertEquals(listOf("Kotlin"), added.skills)
+        assertEquals(listOf("0917"), added.contact.phones)
+        assertEquals(emptyList<String>(), added.contact.emails)
+        assertTrue(added.interactions.isEmpty())
+    }
+
+    @Test
+    fun addMode_blankName_doesNotSave() {
+        val viewModel = PersonEditViewModel(SavedStateHandle())
+
+        assertFalse(viewModel.save())
+        assertNotNull(viewModel.errors.firstName)
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
     fun phones_addEditRemove() {
         val viewModel = viewModelFor(person.id)
         val startCount = viewModel.form.phones.size

@@ -35,6 +35,8 @@ object Routes {
     fun personDetail(personId: Int) = "person_detail/$personId"
     const val PERSON_EDIT = "person_edit/{$PERSON_ID}"
     fun personEdit(personId: Int) = "person_edit/$personId"
+    // No personId: the edit form opens blank and saving adds a new person
+    const val PERSON_ADD = "person_add"
 }
 
 @Composable
@@ -66,6 +68,9 @@ fun AppNavHost(
                     viewModel = personListViewModel,
                     onPersonClick = { personId ->
                         navController.navigate(Routes.personDetail(personId))
+                    },
+                    onAddClick = {
+                        navController.navigate(Routes.PERSON_ADD)
                     }
                 )
             }
@@ -107,6 +112,21 @@ fun AppNavHost(
                     onSaved = {
                         navController.popBackStack()
                         showMessage("Changes saved successfully.")
+                    }
+                )
+            }
+
+            // 4. Person Add (same form as Edit, opened blank; saving returns to the List)
+            composable(Routes.PERSON_ADD) {
+                val personAddViewModel: PersonEditViewModel = viewModel()
+                PersonEditScreen(
+                    viewModel = personAddViewModel,
+                    onDone = {
+                        navController.popBackStack()
+                    },
+                    onSaved = {
+                        navController.popBackStack()
+                        showMessage("Person added successfully.")
                     }
                 )
             }

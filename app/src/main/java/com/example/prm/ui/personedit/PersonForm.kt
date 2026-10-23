@@ -1,6 +1,9 @@
 package com.example.prm.ui.personedit
 
+import com.example.prm.data.model.Contact
 import com.example.prm.data.model.Person
+import com.example.prm.data.model.PersonalInfo
+import com.example.prm.data.model.Relationship
 
 // Picking this in the Relationship dropdown shows a text box for a custom category
 const val OTHER_RELATIONSHIP = "Other / Custom"
@@ -103,6 +106,21 @@ fun PersonForm.applyTo(person: Person): Person = person.copy(
     skills = splitCommaList(skills),
     interests = splitCommaList(interests),
     notes = notes.trim()
+)
+
+// Empty starting point for a new person; applyTo() fills it from the form.
+// The id is a placeholder: PersonRepository.addPerson assigns the real one.
+fun blankPerson(): Person = Person(
+    id = 0,
+    firstName = "",
+    lastName = "",
+    contact = Contact(emails = emptyList(), phones = emptyList(), location = "", preferredContact = ""),
+    personalInfo = PersonalInfo(birthday = "", pronouns = "", gender = "", occupation = ""),
+    relationship = Relationship(category = "", workplaceOrSchool = "", howYouMet = "", dateYouMet = ""),
+    interests = emptyList(),
+    skills = emptyList(),
+    notes = "",
+    interactions = emptyList()
 )
 
 fun PersonForm.validate(): PersonFormErrors = PersonFormErrors(

@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.prm.R
 import com.example.prm.ui.components.PersonCard
 import com.example.prm.ui.components.SearchField
 
@@ -23,14 +27,27 @@ import com.example.prm.ui.components.SearchField
 @Composable
 fun PersonListScreen(
     viewModel: PersonListViewModel,
-    onPersonClick: (Int) -> Unit = {}
+    onPersonClick: (Int) -> Unit = {},
+    onAddClick: () -> Unit = {}
 ) {
     val people = viewModel.people
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "People") }
+                title = { Text(text = "People") },
+                actions = {
+                    // Round purple "+" button: opens the Add Person form
+                    FilledIconButton(
+                        onClick = onAddClick,
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_add),
+                            contentDescription = "Add person"
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->

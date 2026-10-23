@@ -9,18 +9,25 @@ import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.navigation.Routes
 
-// One instance per edit screen. personId comes from the route, like PersonDetailViewModel.
+// One instance per edit/add screen. personId comes from the route, like PersonDetailViewModel.
+// No personId (the "person_add" route) means Add mode: blank form, save creates a new person.
 class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     private val personRepository = PersonRepository
 
     private val personId: Int? = savedStateHandle[Routes.PERSON_ID]
 
-    // The person as they were when the screen opened; null if not found
+    val isNewPerson: Boolean = personId == null
+
+    // The person as they were when the screen opened; null in Add mode or if not found
     private val original: Person? = personId?.let { personRepository.getPersonById(it) }
 
-    val isPersonFound: Boolean = original != null
+    // False only when editing an id that doesn't exist
+    val isPersonFound: Boolean = isNewPerson || original != null
 
-    var form by mutableStateOf(original?.toForm() ?: PersonForm())
+    // What the form started with; Add mode starts blank with "Friend" preselected
+    private val initialForm: PersonForm = original?.toForm() ?: PersonForm(category = "Friend")
+
+    var form by mutableStateOf(initialForm)
         private set
 
     var errors by mutableStateOf(PersonFormErrors())
@@ -29,9 +36,9 @@ class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     // After the first Save attempt, errors update live as the user fixes fields
     private var saveAttempted = false
 
-    // True if anything differs from what was loaded (used for "Discard changes?")
+    // True if anything differs from what the form started with (used for "Discard changes?")
     val hasChanges: Boolean
-        get() = original != null && form != original.toForm()
+        get() = isPersonFound && form != initialForm
 
     // Generic field update, e.g. onFormChange { copy(firstName = newText) }
     fun onFormChange(update: PersonForm.() -> PersonForm) {
@@ -59,13 +66,18 @@ class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         return !errors.hasErrors
     }
 
-    // Validates, then saves to the repository.
+    // Validates, then saves to the repository (adds in Add mode, updates otherwise).
     // Returns true if saved (the screen then navigates back), false if there are errors.
     fun save(): Boolean {
-        val person = original ?: return false
+        if (!isPersonFound) return false
         if (!validate()) return false
 
-        personRepository.updatePerson(form.applyTo(person))
+        val person = original
+        if (person == null) {
+            personRepository.addPerson(form.applyTo(blankPerson()))
+        } else {
+            personRepository.updatePerson(form.applyTo(person))
+        }
         return true
     }
 
