@@ -2,9 +2,11 @@ package com.example.prm.util
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import java.util.Locale
+import java.util.TimeZone
 
 class DateFormatTest {
     private lateinit var originalLocale: Locale
@@ -39,6 +41,31 @@ class DateFormatTest {
         assertEquals("8:30 PM", formatDisplayTime("20:30"))
         assertEquals("12:00 AM", formatDisplayTime("00:00"))
         assertEquals("9:05 AM", formatDisplayTime("09:05"))
+    }
+
+    @Test
+    fun isoDateToUtcMillis_roundTripsBackToSameDate() {
+        val millis = isoDateToUtcMillis("2024-09-03")
+        assertEquals(1725321600000L, millis) // 2024-09-03T00:00:00Z
+        assertEquals("2024-09-03", utcMillisToIsoDate(millis!!))
+    }
+
+    @Test
+    fun isoDateToUtcMillis_invalidOrBlank_returnsNull() {
+        assertNull(isoDateToUtcMillis(""))
+        assertNull(isoDateToUtcMillis("2024-13-40"))
+    }
+
+    @Test
+    fun utcMillisToIsoDate_ignoresDeviceTimezone() {
+        val original = TimeZone.getDefault()
+        try {
+            // Far behind UTC: a local-time formatter would give the previous day
+            TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
+            assertEquals("2024-09-03", utcMillisToIsoDate(1725321600000L))
+        } finally {
+            TimeZone.setDefault(original)
+        }
     }
 
     @Test
