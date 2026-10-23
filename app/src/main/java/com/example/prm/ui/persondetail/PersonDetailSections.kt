@@ -46,7 +46,7 @@ fun PersonHeader(person: Person) {
         )
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "${person.firstName} ${person.lastName}",
+                text = "${person.firstName} ${person.lastName}".trim(),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp

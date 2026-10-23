@@ -72,13 +72,8 @@ fun PersonEditScreen(
     val onSaveClick: () -> Boolean = {
         when {
             !viewModel.validate() -> false
-            // Adding: save right away, no confirmation
-            viewModel.isNewPerson -> {
-                if (viewModel.save()) onSaved()
-                true
-            }
-            // Nothing to save; just leave, no confirmation or message
-            !viewModel.hasChanges -> {
+            // Editing with nothing changed: just leave, no confirmation or message
+            !viewModel.isNewPerson && !viewModel.hasChanges -> {
                 onDone()
                 true
             }
@@ -117,10 +112,15 @@ fun PersonEditScreen(
     )
 
     if (showSaveSheet) {
+        // Same sheet for Add and Edit, with wording for each
         ConfirmationSheet(
-            title = "Save changes?",
-            message = "This will update the person's information with your changes.",
-            confirmText = "Save Changes",
+            title = if (viewModel.isNewPerson) "Add this person?" else "Save changes?",
+            message = if (viewModel.isNewPerson) {
+                "Confirm that you want to add this person to your network."
+            } else {
+                "This will update the person's information with your changes."
+            },
+            confirmText = if (viewModel.isNewPerson) "Add Person" else "Save Changes",
             destructive = false,
             onConfirm = {
                 showSaveSheet = false

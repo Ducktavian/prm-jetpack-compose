@@ -62,7 +62,7 @@ fun PersonCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "${person.firstName} ${person.lastName}",
+                    text = "${person.firstName} ${person.lastName}".trim(),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
