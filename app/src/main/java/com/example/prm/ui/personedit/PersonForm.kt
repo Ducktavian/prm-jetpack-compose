@@ -2,7 +2,11 @@ package com.example.prm.ui.personedit
 
 import com.example.prm.data.model.Person
 
-val RELATIONSHIP_OPTIONS = listOf("Friend", "Family", "Classmate", "Coworker", "Mentor", "Professional")
+// Picking this in the Relationship dropdown shows a text box for a custom category
+const val OTHER_RELATIONSHIP = "Other / Custom"
+
+val STANDARD_RELATIONSHIPS = listOf("Friend", "Family", "Classmate", "Coworker", "Mentor", "Professional")
+val RELATIONSHIP_OPTIONS = STANDARD_RELATIONSHIPS + OTHER_RELATIONSHIP
 val PREFERRED_CONTACT_OPTIONS = listOf("Phone", "Email")
 
 // What the edit form holds while the user types. Everything is plain text so the
@@ -11,7 +15,8 @@ data class PersonForm(
     // Name & relationship
     val firstName: String = "",
     val lastName: String = "",
-    val category: String = "",
+    val category: String = "",          // dropdown choice; may be OTHER_RELATIONSHIP
+    val customCategory: String = "",    // only used when category == OTHER_RELATIONSHIP
 
     // Relationship details
     val workplaceOrSchool: String = "",
@@ -37,16 +42,24 @@ data class PersonForm(
 // Errors to show under fields; null means that field is fine
 data class PersonFormErrors(
     val firstName: String? = null,
-    val category: String? = null
+    val category: String? = null,
+    val customCategory: String? = null
 ) {
-    val hasErrors: Boolean get() = firstName != null || category != null
+    val hasErrors: Boolean
+        get() = firstName != null || category != null || customCategory != null
 }
 
 // Person -> form (when the edit screen opens)
 fun Person.toForm(): PersonForm = PersonForm(
     firstName = firstName,
     lastName = lastName,
-    category = relationship.category,
+    // A category that isn't a standard option (e.g. "Neighbor") opens as Other + custom text
+    category = when {
+        relationship.category.isBlank() -> ""
+        relationship.category in STANDARD_RELATIONSHIPS -> relationship.category
+        else -> OTHER_RELATIONSHIP
+    },
+    customCategory = if (relationship.category in STANDARD_RELATIONSHIPS) "" else relationship.category,
     workplaceOrSchool = relationship.workplaceOrSchool,
     howYouMet = relationship.howYouMet,
     dateYouMet = relationship.dateYouMet,
@@ -70,7 +83,7 @@ fun PersonForm.applyTo(person: Person): Person = person.copy(
     firstName = firstName.trim(),
     lastName = lastName.trim(),
     relationship = person.relationship.copy(
-        category = category.trim(),
+        category = resolvedCategory(),
         workplaceOrSchool = workplaceOrSchool.trim(),
         howYouMet = howYouMet.trim(),
         dateYouMet = dateYouMet
@@ -94,8 +107,17 @@ fun PersonForm.applyTo(person: Person): Person = person.copy(
 
 fun PersonForm.validate(): PersonFormErrors = PersonFormErrors(
     firstName = if (firstName.isBlank()) "First name is required" else null,
-    category = if (category.isBlank()) "Relationship is required" else null
+    category = if (category.isBlank()) "Relationship is required" else null,
+    customCategory = if (category == OTHER_RELATIONSHIP && customCategory.isBlank()) {
+        "Enter a relationship"
+    } else {
+        null
+    }
 )
+
+// The category actually saved: the custom text when "Other / Custom" is picked
+fun PersonForm.resolvedCategory(): String =
+    if (category == OTHER_RELATIONSHIP) customCategory.trim() else category.trim()
 
 // "UI/UX,  Figma, , Prototyping" -> ["UI/UX", "Figma", "Prototyping"]
 fun splitCommaList(text: String): List<String> =

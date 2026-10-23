@@ -210,6 +210,18 @@ fun PersonEditContent(
                 required = true,
                 error = errors.category
             )
+            // Only shown when "Other / Custom" is picked
+            if (form.category == OTHER_RELATIONSHIP) {
+                FormTextField(
+                    label = "Custom relationship",
+                    value = form.customCategory,
+                    onValueChange = { onFormChange { copy(customCategory = it) } },
+                    required = true,
+                    error = errors.customCategory,
+                    placeholder = "e.g. Professor, Neighbor, Client...",
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
+                )
+            }
 
             // 2. Relationship details
             FormSectionHeader(title = "Relationship details", modifier = Modifier.padding(top = 8.dp))

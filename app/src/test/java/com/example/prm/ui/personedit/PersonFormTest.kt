@@ -62,6 +62,49 @@ class PersonFormTest {
     }
 
     @Test
+    fun toForm_nonStandardCategory_opensAsOtherWithCustomText() {
+        val neighbor = person.copy(relationship = person.relationship.copy(category = "Neighbor"))
+        val form = neighbor.toForm()
+
+        assertEquals(OTHER_RELATIONSHIP, form.category)
+        assertEquals("Neighbor", form.customCategory)
+        // And saves back unchanged
+        assertEquals(neighbor, form.applyTo(neighbor))
+    }
+
+    @Test
+    fun toForm_standardCategory_hasNoCustomText() {
+        val friend = person.copy(relationship = person.relationship.copy(category = "Friend"))
+        val form = friend.toForm()
+
+        assertEquals("Friend", form.category)
+        assertEquals("", form.customCategory)
+    }
+
+    @Test
+    fun applyTo_otherSelected_savesTrimmedCustomText() {
+        val form = person.toForm().copy(category = OTHER_RELATIONSHIP, customCategory = "  Professor ")
+        assertEquals("Professor", form.applyTo(person).relationship.category)
+    }
+
+    @Test
+    fun applyTo_standardSelected_ignoresLeftoverCustomText() {
+        // User picked Other, typed something, then switched back to Mentor
+        val form = person.toForm().copy(category = "Mentor", customCategory = "Professor")
+        assertEquals("Mentor", form.applyTo(person).relationship.category)
+    }
+
+    @Test
+    fun validate_otherSelected_requiresCustomText() {
+        val form = PersonForm(firstName = "Alex", category = OTHER_RELATIONSHIP, customCategory = " ")
+        val errors = form.validate()
+
+        assertTrue(errors.hasErrors)
+        assertNotNull(errors.customCategory)
+        assertNull(errors.category)
+    }
+
+    @Test
     fun validate_lastNameIsOptional() {
         val errors = PersonForm(firstName = "Alex", lastName = "", category = "Friend").validate()
 
