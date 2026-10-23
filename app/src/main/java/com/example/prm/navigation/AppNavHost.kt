@@ -11,6 +11,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.prm.ui.persondetail.PersonDetailScreen
 import com.example.prm.ui.persondetail.PersonDetailViewModel
+import com.example.prm.ui.personedit.PersonEditScreen
+import com.example.prm.ui.personedit.PersonEditViewModel
 import com.example.prm.ui.personlist.PersonListScreen
 import com.example.prm.ui.personlist.PersonListViewModel
 
@@ -19,6 +21,8 @@ object Routes {
     const val PERSON_LIST = "person_list"
     const val PERSON_DETAIL = "person_detail/{$PERSON_ID}"
     fun personDetail(personId: Int) = "person_detail/$personId"
+    const val PERSON_EDIT = "person_edit/{$PERSON_ID}"
+    fun personEdit(personId: Int) = "person_edit/$personId"
 }
 
 @Composable
@@ -54,6 +58,24 @@ fun AppNavHost(
             PersonDetailScreen(
                 viewModel = personDetailViewModel,
                 onBackClick = {
+                    navController.popBackStack()
+                },
+                onEditClick = { personId ->
+                    navController.navigate(Routes.personEdit(personId))
+                }
+            )
+        }
+
+        // 3. Person Edit (Cancel and Save both pop back to Detail, which
+        // refreshes itself from the repository)
+        composable(
+            route = Routes.PERSON_EDIT,
+            arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
+        ) {
+            val personEditViewModel: PersonEditViewModel = viewModel()
+            PersonEditScreen(
+                viewModel = personEditViewModel,
+                onDone = {
                     navController.popBackStack()
                 }
             )

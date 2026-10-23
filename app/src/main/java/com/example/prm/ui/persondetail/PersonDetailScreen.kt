@@ -27,11 +27,13 @@ import com.example.prm.ui.theme.PRMTheme
 @Composable
 fun PersonDetailScreen(
     viewModel: PersonDetailViewModel,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onEditClick: (Int) -> Unit = {}
 ) {
     PersonDetailContent(
         person = viewModel.person,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        onEditClick = onEditClick
     )
 }
 
@@ -40,7 +42,8 @@ fun PersonDetailScreen(
 @Composable
 fun PersonDetailContent(
     person: Person?,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onEditClick: (Int) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -52,7 +55,10 @@ fun PersonDetailContent(
                     }
                 },
                 actions = {
-                    TextButton(onClick = { /* Handle edit action */ }) {
+                    TextButton(
+                        onClick = { person?.let { onEditClick(it.id) } },
+                        enabled = person != null
+                    ) {
                         Text(text = "Edit", fontWeight = FontWeight.Bold)
                     }
                     TextButton(

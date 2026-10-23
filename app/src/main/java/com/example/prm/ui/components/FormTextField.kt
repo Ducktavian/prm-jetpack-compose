@@ -30,7 +30,9 @@ fun FormTextField(
     // Set false + minLines for multi-line input (e.g. Notes)
     singleLine: Boolean = true,
     minLines: Int = 1,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    // Optional icon/button at the end of the box (e.g. remove a phone number)
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -42,6 +44,7 @@ fun FormTextField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = placeholder?.let { { Text(text = it) } },
+            trailingIcon = trailingIcon,
             isError = error != null,
             supportingText = error?.let { { Text(text = it) } },
             singleLine = singleLine,
