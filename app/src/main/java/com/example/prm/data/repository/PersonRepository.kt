@@ -5,10 +5,17 @@ import com.example.prm.data.model.Interaction
 import com.example.prm.data.model.Person
 import com.example.prm.data.model.PersonalInfo
 import com.example.prm.data.model.Relationship
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 
-class PersonRepository {
+// Single shared instance (object), so every screen reads and edits the same data
+object PersonRepository {
 
-    val mockPeople = listOf(
+    private val mockPeople = listOf(
         Person(
             id = 1,
             firstName = "Alex",
@@ -431,11 +438,29 @@ class PersonRepository {
         )
     )
 
+    // Current people list. Starts with the mock data; changes are kept in memory only
+    // (lost when the app closes). Screens collect this to update automatically.
+    private val _people = MutableStateFlow(mockPeople)
+    val people: StateFlow<List<Person>> = _people.asStateFlow()
+
+    // Snapshot of the list right now (doesn't update)
     fun getPeople(): List<Person> {
-        return mockPeople
+        return _people.value
     }
 
     fun getPersonById(id: Int): Person? {
-        return mockPeople.find { it.id == id }
+        return _people.value.find { it.id == id }
+    }
+
+    // Emits the person again every time they change; null if not found (e.g. deleted)
+    fun observePerson(id: Int): Flow<Person?> {
+        return people.map { list -> list.find { it.id == id } }
+    }
+
+    // Replaces the person with the same id. Does nothing if the id isn't found.
+    fun updatePerson(person: Person) {
+        _people.update { list ->
+            list.map { if (it.id == person.id) person else it }
+        }
     }
 }

@@ -5,18 +5,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
+import kotlinx.coroutines.launch
 
 class PersonListViewModel : ViewModel() {
-    private val personRepository = PersonRepository()
+    private val personRepository = PersonRepository
 
-    private val allPeople = personRepository.getPeople()
+    // Full list, kept in sync with the repository (e.g. after an edit is saved)
+    private var allPeople by mutableStateOf(personRepository.getPeople())
 
     var searchQuery by mutableStateOf("")
         private set
 
-    // Re-filters only when searchQuery changes
+    init {
+        viewModelScope.launch {
+            personRepository.people.collect { allPeople = it }
+        }
+    }
+
+    // Re-filters only when searchQuery or allPeople changes
     val people: List<Person> by derivedStateOf {
         val query = searchQuery.trim()
         if (query.isEmpty()) allPeople

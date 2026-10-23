@@ -104,7 +104,7 @@ fun PersonDetailContent(
 @Composable
 fun PersonDetailPreview() {
     PRMTheme {
-        PersonDetailContent(person = PersonRepository().getPeople().first())
+        PersonDetailContent(person = PersonRepository.getPeople().first())
     }
 }
 
