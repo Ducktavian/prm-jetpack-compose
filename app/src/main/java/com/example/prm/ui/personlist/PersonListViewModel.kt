@@ -25,6 +25,10 @@ class PersonListViewModel : ViewModel() {
         }
     }
 
+    // True when nobody has been added yet (as opposed to a search with no results)
+    val hasNoPeople: Boolean
+        get() = allPeople.isEmpty()
+
     // Re-filters only when searchQuery or allPeople changes
     val people: List<Person> by derivedStateOf {
         val query = searchQuery.trim()

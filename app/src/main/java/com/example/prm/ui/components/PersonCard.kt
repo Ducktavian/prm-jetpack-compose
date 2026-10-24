@@ -26,6 +26,7 @@ import com.example.prm.data.model.Person
 @Composable
 fun PersonCard(
     person: Person,
+    modifier: Modifier = Modifier,
     onViewClick: () -> Unit = {}
 ) {
     val initials = "${person.firstName.take(1)}${person.lastName.take(1)}"
@@ -43,14 +44,13 @@ fun PersonCard(
     OutlinedCard(
         onClick = onViewClick,
         interactionSource = interactionSource,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(2.dp, currentColor)
     ) {
+        // No fillMaxWidth needed: the weighted Column already stretches the Row
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {

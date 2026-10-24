@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.prm.R
+import com.example.prm.data.model.Person
 import com.example.prm.ui.components.PersonCard
 import com.example.prm.ui.components.SearchField
 
@@ -30,8 +31,6 @@ fun PersonListScreen(
     onPersonClick: (Int) -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
-    val people = viewModel.people
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -51,38 +50,67 @@ fun PersonListScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            // 1. Search bar (fixed while the list scrolls)
-            SearchField(
-                query = viewModel.searchQuery,
-                onQueryChange = viewModel::onSearchQueryChange,
-                placeholder = "Search",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+        PersonListContent(
+            people = viewModel.people,
+            hasNoPeople = viewModel.hasNoPeople,
+            searchQuery = viewModel.searchQuery,
+            onSearchQueryChange = viewModel::onSearchQueryChange,
+            onPersonClick = onPersonClick,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
 
-            // 2. Results
-            if (people.isEmpty()) {
-                Text(
-                    text = "No people match \"${viewModel.searchQuery.trim()}\"",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp)
-                )
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(people, key = { it.id }) { person ->
-                        PersonCard(
-                            person = person,
-                            onViewClick = { onPersonClick(person.id) }
-                        )
-                    }
+// Stateless: everything it shows comes in through parameters
+@Composable
+fun PersonListContent(
+    people: List<Person>,
+    hasNoPeople: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onPersonClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        // 1. Search bar (fixed while the list scrolls)
+        SearchField(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            placeholder = "Search",
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        // 2. Results
+        when {
+            hasNoPeople -> EmptyState(
+                message = "No people yet. Tap + to add someone."
+            )
+            people.isEmpty() -> EmptyState(
+                message = "No people match \"${searchQuery.trim()}\""
+            )
+            else -> LazyColumn(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(people, key = { it.id }) { person ->
+                    PersonCard(
+                        person = person,
+                        onViewClick = { onPersonClick(person.id) }
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun EmptyState(message: String) {
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+    )
 }
