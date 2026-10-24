@@ -186,18 +186,10 @@ app/src/main/java/com/example/prm/
 
 ---
 
-## User testing & feedback
-
-_[Fill in: who tried the app and how, e.g. "3 classmates used it on their phones to add a person and log an interaction."]_
-
-| Feedback | What changed |
-|---|---|
-| _[e.g. "I deleted someone by accident"]_ | _[e.g. Added Undo to the delete message]_ |
-| _[Feedback]_ | _[Change]_ |
-
----
 
 ## Limitations and next steps
 - Data is in memory only — add persistent storage (e.g. Room).
 - No photos for people yet; avatars show initials.
 - No reminders or follow-up notifications for interactions.
+
+.
