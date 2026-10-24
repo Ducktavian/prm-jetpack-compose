@@ -20,8 +20,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,8 +53,9 @@ fun PersonEditScreen(
     // Leave after a confirmed save
     onSaved: () -> Unit = {}
 ) {
-    var showDiscardDialog by remember { mutableStateOf(false) }
-    var showSaveSheet by remember { mutableStateOf(false) }
+    // Saveable so an open sheet/dialog survives rotation
+    var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
+    var showSaveSheet by rememberSaveable { mutableStateOf(false) }
 
     // Save tapped: show errors if invalid, otherwise ask for confirmation.
     // Returns false when there are errors (so the form scrolls up to them).

@@ -12,7 +12,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -47,6 +49,17 @@ object Routes {
         "interaction_edit/$personId/$interactionId"
 }
 
+// A screen stops being RESUMED as soon as it navigates or is popped, so these
+// ignore a second tap that lands before the transition finishes. Without this,
+// a double tap opens a screen twice, or pops past the first screen (blank app).
+private fun NavHostController.navigateFrom(entry: NavBackStackEntry, route: String) {
+    if (entry.lifecycle.currentState == Lifecycle.State.RESUMED) navigate(route)
+}
+
+private fun NavHostController.popFrom(entry: NavBackStackEntry) {
+    if (entry.lifecycle.currentState == Lifecycle.State.RESUMED) popBackStack()
+}
+
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
@@ -70,15 +83,15 @@ fun AppNavHost(
             // and it's cleared when that screen leaves the back stack.
 
             // 1. Person List
-            composable(Routes.PERSON_LIST) {
+            composable(Routes.PERSON_LIST) { entry ->
                 val personListViewModel: PersonListViewModel = viewModel()
                 PersonListScreen(
                     viewModel = personListViewModel,
                     onPersonClick = { personId ->
-                        navController.navigate(Routes.personDetail(personId))
+                        navController.navigateFrom(entry, Routes.personDetail(personId))
                     },
                     onAddClick = {
-                        navController.navigate(Routes.PERSON_ADD)
+                        navController.navigateFrom(entry, Routes.PERSON_ADD)
                     }
                 )
             }
@@ -87,21 +100,21 @@ fun AppNavHost(
             composable(
                 route = Routes.PERSON_DETAIL,
                 arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
-            ) {
+            ) { entry ->
                 val personDetailViewModel: PersonDetailViewModel = viewModel()
                 PersonDetailScreen(
                     viewModel = personDetailViewModel,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                     },
                     onEditClick = { personId ->
-                        navController.navigate(Routes.personEdit(personId))
+                        navController.navigateFrom(entry, Routes.personEdit(personId))
                     },
                     onAddInteractionClick = { personId ->
-                        navController.navigate(Routes.interactionAdd(personId))
+                        navController.navigateFrom(entry, Routes.interactionAdd(personId))
                     },
                     onEditInteractionClick = { personId, interactionId ->
-                        navController.navigate(Routes.interactionEdit(personId, interactionId))
+                        navController.navigateFrom(entry, Routes.interactionEdit(personId, interactionId))
                     },
                     // Stays on Detail (which already updated itself); just confirm it
                     onInteractionDeleted = {
@@ -109,7 +122,7 @@ fun AppNavHost(
                     },
                     // Person is gone, so go back to the list (which already updated itself)
                     onDeleted = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                         showMessage("Person deleted successfully.")
                     }
                 )
@@ -120,30 +133,30 @@ fun AppNavHost(
             composable(
                 route = Routes.PERSON_EDIT,
                 arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
-            ) {
+            ) { entry ->
                 val personEditViewModel: PersonEditViewModel = viewModel()
                 PersonEditScreen(
                     viewModel = personEditViewModel,
                     onDone = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                     },
                     onSaved = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                         showMessage("Changes saved successfully.")
                     }
                 )
             }
 
             // 4. Person Add (same form as Edit, opened blank; saving returns to the List)
-            composable(Routes.PERSON_ADD) {
+            composable(Routes.PERSON_ADD) { entry ->
                 val personAddViewModel: PersonEditViewModel = viewModel()
                 PersonEditScreen(
                     viewModel = personAddViewModel,
                     onDone = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                     },
                     onSaved = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                         showMessage("Person added successfully.")
                     }
                 )
@@ -153,15 +166,15 @@ fun AppNavHost(
             composable(
                 route = Routes.INTERACTION_ADD,
                 arguments = listOf(navArgument(Routes.PERSON_ID) { type = NavType.IntType })
-            ) {
+            ) { entry ->
                 val interactionFormViewModel: InteractionFormViewModel = viewModel()
                 InteractionFormScreen(
                     viewModel = interactionFormViewModel,
                     onDone = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                     },
                     onSaved = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                         showMessage("Interaction added successfully.")
                     }
                 )
@@ -174,15 +187,15 @@ fun AppNavHost(
                     navArgument(Routes.PERSON_ID) { type = NavType.IntType },
                     navArgument(Routes.INTERACTION_ID) { type = NavType.IntType }
                 )
-            ) {
+            ) { entry ->
                 val interactionFormViewModel: InteractionFormViewModel = viewModel()
                 InteractionFormScreen(
                     viewModel = interactionFormViewModel,
                     onDone = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                     },
                     onSaved = {
-                        navController.popBackStack()
+                        navController.popFrom(entry)
                         showMessage("Interaction updated successfully.")
                     }
                 )

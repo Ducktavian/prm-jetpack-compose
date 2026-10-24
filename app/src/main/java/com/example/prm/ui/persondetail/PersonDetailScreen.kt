@@ -16,7 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,9 +45,11 @@ fun PersonDetailScreen(
     onDeleted: () -> Unit = {}
 ) {
     val person = viewModel.person
-    var showDeleteSheet by remember { mutableStateOf(false) }
-    // The interaction waiting for delete confirmation; null = no sheet
-    var interactionToDelete by remember { mutableStateOf<Interaction?>(null) }
+    // Saveable so an open sheet survives rotation
+    var showDeleteSheet by rememberSaveable { mutableStateOf(false) }
+    // Id of the interaction waiting for delete confirmation; null = no sheet
+    var interactionToDeleteId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val interactionToDelete = person?.interactions?.find { it.id == interactionToDeleteId }
 
     PersonDetailContent(
         person = person,
@@ -57,7 +59,7 @@ fun PersonDetailScreen(
         onEditInteractionClick = { interaction ->
             person?.let { onEditInteractionClick(it.id, interaction.id) }
         },
-        onDeleteInteractionClick = { interactionToDelete = it },
+        onDeleteInteractionClick = { interactionToDeleteId = it.id },
         onDeleteClick = { showDeleteSheet = true }
     )
 
@@ -69,11 +71,11 @@ fun PersonDetailScreen(
                     "from $whenText. This cannot be undone.",
             confirmText = "Delete Interaction",
             onConfirm = {
-                interactionToDelete = null
+                interactionToDeleteId = null
                 viewModel.deleteInteraction(interaction.id)
                 onInteractionDeleted()
             },
-            onDismiss = { interactionToDelete = null }
+            onDismiss = { interactionToDeleteId = null }
         )
     }
 

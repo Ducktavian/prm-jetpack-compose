@@ -17,7 +17,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,7 +39,6 @@ fun ConfirmationSheet(
     confirmText: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    dismissText: String = "Cancel",
     // true = red confirm button (delete); false = purple (save)
     destructive: Boolean = true
 ) {
@@ -44,9 +47,14 @@ fun ConfirmationSheet(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    // Set by the first button tap; later taps during the slide-down are ignored,
+    // so a double tap can't save or delete twice
+    var isClosing by remember { mutableStateOf(false) }
 
     // Slide the sheet down first, then run the action
     fun hideThen(action: () -> Unit) {
+        if (isClosing) return
+        isClosing = true
         scope.launch { sheetState.hide() }.invokeOnCompletion { action() }
     }
 
@@ -85,7 +93,7 @@ fun ConfirmationSheet(
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
                 ) {
-                    Text(text = dismissText, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Text(text = "Cancel", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 }
                 Button(
                     onClick = { hideThen(onConfirm) },
