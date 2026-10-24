@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round launcher icon for Android 7.x launchers that ask for one -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#6200EE"
+        android:pathData="M0,54 A54,54 0 1 0 108,54 A54,54 0 1 0 0,54 Z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,34 A8,8 0 1 0 62,34 A8,8 0 1 0 46,34 Z M43,56 A11,11 0 0 1 65,56 V59 Q65,62 62,62 H46 Q43,62 43,59 Z M25,54 A8,8 0 1 0 41,54 A8,8 0 1 0 25,54 Z M22,76 A11,11 0 0 1 44,76 V79 Q44,82 41,82 H25 Q22,82 22,79 Z M67,54 A8,8 0 1 0 83,54 A8,8 0 1 0 67,54 Z M64,76 A11,11 0 0 1 86,76 V79 Q86,82 83,82 H67 Q64,82 64,79 Z" />
+</vector>
