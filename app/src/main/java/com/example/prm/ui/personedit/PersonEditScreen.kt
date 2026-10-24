@@ -1,6 +1,5 @@
 package com.example.prm.ui.personedit
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -34,12 +29,13 @@ import androidx.compose.ui.unit.dp
 import com.example.prm.R
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.ui.components.BottomActionBar
-import com.example.prm.ui.components.ConfirmationSheet
 import com.example.prm.ui.components.DateField
-import com.example.prm.ui.components.DiscardChangesDialog
 import com.example.prm.ui.components.DropdownField
 import com.example.prm.ui.components.FormSectionHeader
 import com.example.prm.ui.components.FormTextField
+import com.example.prm.ui.form.FormFlow
+import com.example.prm.ui.form.OTHER_OPTION
+import com.example.prm.ui.form.SaveConfirmation
 import com.example.prm.ui.theme.PRMTheme
 import kotlinx.coroutines.launch
 
@@ -53,81 +49,44 @@ fun PersonEditScreen(
     // Leave after a confirmed save
     onSaved: () -> Unit = {}
 ) {
-    // Saveable so an open sheet/dialog survives rotation
-    var showDiscardDialog by rememberSaveable { mutableStateOf(false) }
-    var showSaveSheet by rememberSaveable { mutableStateOf(false) }
-
-    // Save tapped: show errors if invalid, otherwise ask for confirmation.
-    // Returns false when there are errors (so the form scrolls up to them).
-    val onSaveClick: () -> Boolean = {
-        when {
-            !viewModel.validate() -> false
-            // Editing with nothing changed: just leave, no confirmation or message
-            !viewModel.isNewPerson && !viewModel.hasChanges -> {
-                onDone()
-                true
-            }
-            else -> {
-                showSaveSheet = true
-                true
-            }
-        }
-    }
-
-    // Ask before throwing away edits; leave right away if nothing changed
-    val requestClose: () -> Unit = {
-        if (viewModel.hasChanges) {
-            showDiscardDialog = true
-        } else {
-            onDone()
-        }
-    }
-
-    // System back button / gesture behaves the same as Cancel
-    BackHandler(onBack = requestClose)
-
-    PersonEditContent(
-        form = viewModel.form,
-        errors = viewModel.errors,
-        isPersonFound = viewModel.isPersonFound,
-        onFormChange = viewModel::onFormChange,
-        onAddPhone = viewModel::addPhone,
-        onPhoneChange = viewModel::onPhoneChange,
-        onRemovePhone = viewModel::removePhone,
-        onAddEmail = viewModel::addEmail,
-        onEmailChange = viewModel::onEmailChange,
-        onRemoveEmail = viewModel::removeEmail,
-        onSaveClick = onSaveClick,
-        onCancel = requestClose
-    )
-
-    if (showSaveSheet) {
+    FormFlow(
+        isEditing = !viewModel.isNewPerson,
+        hasChanges = { viewModel.hasChanges },
+        validate = viewModel::validate,
+        save = viewModel::save,
         // Same sheet for Add and Edit, with wording for each
-        ConfirmationSheet(
-            title = if (viewModel.isNewPerson) "Add this person?" else "Save changes?",
-            message = if (viewModel.isNewPerson) {
-                "Confirm that you want to add this person to your network."
+        saveConfirmation = {
+            if (viewModel.isNewPerson) {
+                SaveConfirmation(
+                    title = "Add this person?",
+                    message = "Confirm that you want to add this person to your network.",
+                    confirmText = "Add Person"
+                )
             } else {
-                "This will update the person's information with your changes."
-            },
-            confirmText = if (viewModel.isNewPerson) "Add Person" else "Save Changes",
-            destructive = false,
-            onConfirm = {
-                showSaveSheet = false
-                if (viewModel.save()) onSaved()
-            },
-            onDismiss = { showSaveSheet = false }
-        )
-    }
-
-    if (showDiscardDialog) {
-        DiscardChangesDialog(
-            message = "Your edits to this person won't be saved.",
-            onDiscard = {
-                showDiscardDialog = false
-                onDone()
-            },
-            onDismiss = { showDiscardDialog = false }
+                SaveConfirmation(
+                    title = "Save changes?",
+                    message = "This will update the person's information with your changes.",
+                    confirmText = "Save Changes"
+                )
+            }
+        },
+        discardMessage = "Your edits to this person won't be saved.",
+        onDone = onDone,
+        onSaved = onSaved
+    ) { onSaveClick, onClose ->
+        PersonEditContent(
+            form = viewModel.form,
+            errors = viewModel.errors,
+            isPersonFound = viewModel.isPersonFound,
+            onFormChange = viewModel::onFormChange,
+            onAddPhone = viewModel::addPhone,
+            onPhoneChange = viewModel::onPhoneChange,
+            onRemovePhone = viewModel::removePhone,
+            onAddEmail = viewModel::addEmail,
+            onEmailChange = viewModel::onEmailChange,
+            onRemoveEmail = viewModel::removeEmail,
+            onSaveClick = onSaveClick,
+            onCancel = onClose
         )
     }
 }
@@ -226,7 +185,7 @@ fun PersonEditContent(
                 error = errors.category
             )
             // Only shown when "Other / Custom" is picked
-            if (form.category == OTHER_RELATIONSHIP) {
+            if (form.category == OTHER_OPTION) {
                 FormTextField(
                     label = "Custom relationship",
                     value = form.customCategory,

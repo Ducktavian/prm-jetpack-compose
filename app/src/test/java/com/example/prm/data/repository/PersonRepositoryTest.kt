@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -98,9 +100,69 @@ class PersonRepositoryTest {
     }
 
     @Test
-    fun deletePerson_unknownId_changesNothing() {
-        PersonRepository.deletePerson(-1)
+    fun deletePerson_unknownId_changesNothingAndHasNoUndo() {
+        val undo = PersonRepository.deletePerson(-1)
 
+        assertNull(undo)
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
+    fun deletePerson_undo_restoresAtSamePosition() {
+        val target = originalPeople[2]
+
+        val undo = PersonRepository.deletePerson(target.id)
+        assertNotNull(undo)
+        undo!!()
+
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
+    fun deletePerson_undoTwice_restoresOnlyOnce() {
+        val undo = PersonRepository.deletePerson(originalPeople.first().id)!!
+
+        undo()
+        undo()
+
+        assertEquals(originalPeople, PersonRepository.getPeople())
+    }
+
+    @Test
+    fun deletePerson_undoAfterIdWasReused_keepsBothWithUniqueIds() {
+        // Deleting the person with the highest id frees that id for the next new person
+        val target = originalPeople.maxBy { it.id }
+        val undo = PersonRepository.deletePerson(target.id)!!
+        val newId = PersonRepository.addPerson(target.copy(firstName = "Newcomer"))
+        assertEquals(target.id, newId)
+
+        undo()
+
+        val people = PersonRepository.getPeople()
+        assertEquals(originalPeople.size + 1, people.size)
+        assertEquals(people.size, people.map { it.id }.toSet().size)
+        assertTrue(people.any { it.firstName == target.firstName && it.id != target.id })
+    }
+
+    @Test
+    fun deleteInteraction_undo_restoresIt() {
+        val person = originalPeople.first()
+        val target = person.interactions.first()
+
+        val undo = PersonRepository.deleteInteraction(person.id, target.id)
+        assertNotNull(undo)
+        undo!!()
+
+        val interactions = PersonRepository.getPersonById(person.id)!!.interactions
+        assertEquals(person.interactions.size, interactions.size)
+        // Same content is back; only the id may differ
+        assertTrue(interactions.any { it.copy(id = 0) == target.copy(id = 0) })
+    }
+
+    @Test
+    fun deleteInteraction_unknownInteraction_hasNoUndo() {
+        assertNull(PersonRepository.deleteInteraction(originalPeople.first().id, -1))
+        assertNull(PersonRepository.deleteInteraction(-1, -1))
         assertEquals(originalPeople, PersonRepository.getPeople())
     }
 

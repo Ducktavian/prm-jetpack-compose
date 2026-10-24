@@ -1,14 +1,12 @@
 package com.example.prm.ui.interactionform
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.prm.data.model.Interaction
 import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.navigation.Routes
+import com.example.prm.ui.form.FormState
 
 // One instance per Add/Edit Interaction screen. personId (and interactionId when editing)
 // come from the route. No interactionId = Add mode.
@@ -32,34 +30,29 @@ class InteractionFormViewModel(savedStateHandle: SavedStateHandle) : ViewModel()
     val isFound: Boolean = person != null && (!isEditing || original != null)
 
     // e.g. "Mia Santos", for "With Mia Santos" and the confirmation text
-    val personName: String = person?.let { "${it.firstName} ${it.lastName}".trim() } ?: ""
+    val personName: String = person?.fullName ?: ""
 
-    private val initialForm: InteractionForm = original?.toForm() ?: InteractionForm()
+    // Form contents + errors; Edit mode starts filled in from the interaction
+    private val formState = FormState(
+        initial = original?.toForm() ?: InteractionForm(),
+        noErrors = InteractionFormErrors(),
+        validator = { it.validate() }
+    )
 
-    var form by mutableStateOf(initialForm)
-        private set
+    val form: InteractionForm
+        get() = formState.form
 
-    var errors by mutableStateOf(InteractionFormErrors())
-        private set
-
-    // After the first Save attempt, errors update live as the user fixes fields
-    private var saveAttempted = false
+    val errors: InteractionFormErrors
+        get() = formState.errors
 
     val hasChanges: Boolean
-        get() = isFound && form != initialForm
+        get() = isFound && formState.hasChanges
 
     // Generic field update, e.g. onFormChange { copy(date = newDate) }
-    fun onFormChange(update: InteractionForm.() -> InteractionForm) {
-        form = form.update()
-        if (saveAttempted) errors = form.validate()
-    }
+    fun onFormChange(update: InteractionForm.() -> InteractionForm) = formState.update(update)
 
     // Checks required fields and shows any errors. Returns true if the form is valid.
-    fun validate(): Boolean {
-        saveAttempted = true
-        errors = form.validate()
-        return !errors.hasErrors
-    }
+    fun validate(): Boolean = formState.validate()
 
     // Validates, then adds (Add mode) or updates (Edit mode) the interaction.
     // Returns true if saved.

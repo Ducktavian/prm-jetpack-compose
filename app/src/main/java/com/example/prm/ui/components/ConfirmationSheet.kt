@@ -23,10 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 import kotlinx.coroutines.launch
 
 // Bottom sheet asking the user to confirm an action (e.g. delete, save changes).
@@ -70,13 +72,13 @@ fun ConfirmationSheet(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                style = AppTextStyles.sheetTitle,
+                modifier = Modifier.semantics { heading() }
             )
             Text(
                 text = message,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+                style = AppTextStyles.body
             )
             Row(
                 modifier = Modifier

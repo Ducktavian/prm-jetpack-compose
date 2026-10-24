@@ -505,11 +505,16 @@ object PersonRepository {
         }
     }
 
-    // Removes one interaction from that person. Does nothing if not found.
-    fun deleteInteraction(personId: Int, interactionId: Int) {
+    // Removes one interaction from that person. Returns an action that puts it back
+    // (for the snackbar's Undo), or null if the person or interaction isn't found.
+    fun deleteInteraction(personId: Int, interactionId: Int): (() -> Unit)? {
+        val removed = getPersonById(personId)?.interactions?.find { it.id == interactionId }
+            ?: return null
         updateInteractions(personId) { interactions ->
             interactions.filterNot { it.id == interactionId }
         }
+        // Re-adding keeps the list sorted; does nothing if the person was deleted since
+        return { addInteraction(personId, removed) }
     }
 
     private fun updateInteractions(personId: Int, change: (List<Interaction>) -> List<Interaction>) {
@@ -527,11 +532,36 @@ object PersonRepository {
         }
     }
 
-    // Removes the person (and their interactions, which live inside Person).
-    // Does nothing if the id isn't found.
-    fun deletePerson(id: Int) {
-        _people.update { list -> list.filterNot { it.id == id } }
+    // Removes the person (and their interactions, which live inside Person). Returns an
+    // action that puts them back where they were in the list (for the snackbar's Undo),
+    // or null if the id isn't found.
+    fun deletePerson(id: Int): (() -> Unit)? {
+        val list = _people.value
+        val index = list.indexOfFirst { it.id == id }
+        if (index == -1) return null
+        val removed = list[index]
+        _people.update { current -> current.filterNot { it.id == id } }
+        return { restorePerson(removed, index) }
     }
+
+    private fun restorePerson(person: Person, index: Int) {
+        _people.update { list ->
+            when {
+                // Already restored (e.g. Undo tapped twice)
+                person in list -> list
+                // A person added in the meantime got this id; give the restored one a new id
+                list.any { it.id == person.id } -> {
+                    val newId = list.maxOf { it.id } + 1
+                    list.withInserted(index, person.copy(id = newId))
+                }
+                else -> list.withInserted(index, person)
+            }
+        }
+    }
+
+    // Inserts at index, or at the end if the list has shrunk since
+    private fun List<Person>.withInserted(index: Int, person: Person): List<Person> =
+        toMutableList().apply { add(index.coerceAtMost(size), person) }
 
     // Puts the mock data back. For tests only (internal = not visible outside this module).
     internal fun resetToSampleData() {

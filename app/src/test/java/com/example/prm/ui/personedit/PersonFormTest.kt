@@ -1,6 +1,7 @@
 package com.example.prm.ui.personedit
 
 import com.example.prm.data.repository.PersonRepository
+import com.example.prm.ui.form.OTHER_OPTION
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -66,7 +67,7 @@ class PersonFormTest {
         val neighbor = person.copy(relationship = person.relationship.copy(category = "Neighbor"))
         val form = neighbor.toForm()
 
-        assertEquals(OTHER_RELATIONSHIP, form.category)
+        assertEquals(OTHER_OPTION, form.category)
         assertEquals("Neighbor", form.customCategory)
         // And saves back unchanged
         assertEquals(neighbor, form.applyTo(neighbor))
@@ -83,7 +84,7 @@ class PersonFormTest {
 
     @Test
     fun applyTo_otherSelected_savesTrimmedCustomText() {
-        val form = person.toForm().copy(category = OTHER_RELATIONSHIP, customCategory = "  Professor ")
+        val form = person.toForm().copy(category = OTHER_OPTION, customCategory = "  Professor ")
         assertEquals("Professor", form.applyTo(person).relationship.category)
     }
 
@@ -96,7 +97,7 @@ class PersonFormTest {
 
     @Test
     fun validate_otherSelected_requiresCustomText() {
-        val form = PersonForm(firstName = "Alex", category = OTHER_RELATIONSHIP, customCategory = " ")
+        val form = PersonForm(firstName = "Alex", category = OTHER_OPTION, customCategory = " ")
         val errors = form.validate()
 
         assertTrue(errors.hasErrors)

@@ -25,9 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.prm.R
 import com.example.prm.data.model.Contact
 import com.example.prm.data.model.Interaction
@@ -38,6 +39,7 @@ import com.example.prm.ui.components.CircularAvatar
 import com.example.prm.ui.components.InfoRow
 import com.example.prm.ui.components.SectionCard
 import com.example.prm.ui.components.TagChip
+import com.example.prm.ui.theme.AppTextStyles
 import com.example.prm.util.formatDisplayDate
 import com.example.prm.util.formatDisplayTime
 
@@ -51,16 +53,13 @@ fun PersonHeader(person: Person) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CircularAvatar(
-            initials = "${person.firstName.take(1)}${person.lastName.take(1)}",
-            size = 64.dp
-        )
+        CircularAvatar(initials = person.initials, size = 64.dp)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = "${person.firstName} ${person.lastName}".trim(),
+                text = person.fullName,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
+                style = AppTextStyles.personName,
+                modifier = Modifier.semantics { heading() }
             )
             TagChip(text = person.relationship.category)
         }
@@ -140,7 +139,7 @@ fun NotesSection(notes: String) {
             Text(
                 text = notes,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 14.sp,
+                style = AppTextStyles.body,
                 modifier = Modifier.padding(12.dp)
             )
         }
@@ -203,30 +202,35 @@ private fun InteractionItem(
             Text(
                 text = interaction.title,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
+                style = AppTextStyles.itemTitle
             )
             Text(
                 text = "${formatDisplayDate(interaction.date)} · ${formatDisplayTime(interaction.time)}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp
+                style = AppTextStyles.caption
             )
             // Notes are optional, so skip the empty line when there are none
             if (interaction.details.isNotBlank()) {
                 Text(
                     text = interaction.details,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 14.sp
+                    style = AppTextStyles.body
                 )
             }
         }
-        InteractionMenu(onEditClick = onEditClick, onDeleteClick = onDeleteClick)
+        InteractionMenu(
+            interactionTitle = interaction.title,
+            onEditClick = onEditClick,
+            onDeleteClick = onDeleteClick
+        )
     }
 }
 
 // "..." button that opens Edit / Delete for one interaction
 @Composable
 private fun InteractionMenu(
+    // Names the interaction for screen readers ("Options for Coffee meetup")
+    interactionTitle: String,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -236,7 +240,7 @@ private fun InteractionMenu(
         IconButton(onClick = { expanded = true }) {
             Icon(
                 painter = painterResource(R.drawable.ic_more_horiz),
-                contentDescription = "Interaction options",
+                contentDescription = "Options for $interactionTitle",
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -273,7 +277,7 @@ private fun EmptySectionText(text: String) {
     Text(
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontSize = 14.sp,
+        style = AppTextStyles.body,
         modifier = Modifier.padding(12.dp)
     )
 }

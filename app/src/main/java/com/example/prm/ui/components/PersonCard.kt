@@ -17,11 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.prm.data.model.Person
+import com.example.prm.ui.theme.AppTextStyles
 
 @Composable
 fun PersonCard(
@@ -29,8 +29,6 @@ fun PersonCard(
     modifier: Modifier = Modifier,
     onViewClick: () -> Unit = {}
 ) {
-    val initials = "${person.firstName.take(1)}${person.lastName.take(1)}"
-
     // Tracks if the card is currently being pressed by the user
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -55,35 +53,35 @@ fun PersonCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // 1. Avatar
-            CircularAvatar(initials = initials)
+            CircularAvatar(initials = person.initials)
 
             // 2. Name & Category
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "${person.firstName} ${person.lastName}".trim(),
+                    text = person.fullName,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    style = AppTextStyles.cardTitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = person.relationship.category,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 14.sp,
+                    style = AppTextStyles.body,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            // 3. Arrow indicator
+            // 3. Arrow indicator. Decorative, so screen readers skip it and the card
+            // reads as "Alex Santos, Friend" (the avatar hides itself the same way).
             Text(
                 text = ">",
                 color = currentColor,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                style = AppTextStyles.cardArrow,
+                modifier = Modifier.clearAndSetSemantics {}
             )
         }
     }

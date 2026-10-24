@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -15,8 +16,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,7 +41,9 @@ fun PersonListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "People") },
+                title = {
+                    Text(text = "People", modifier = Modifier.semantics { heading() })
+                },
                 actions = {
                     // Round purple "+" button: opens the Add Person form
                     FilledIconButton(
@@ -74,6 +80,18 @@ fun PersonListContent(
     onPersonClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val listState = rememberLazyListState()
+
+    // A keyed list keeps its current top card in place when a card is inserted above it,
+    // so someone restored by Undo at the top would land just out of view. If the list
+    // was at the top, scroll back up so they show.
+    val firstPersonId = people.firstOrNull()?.id
+    LaunchedEffect(firstPersonId) {
+        if (listState.firstVisibleItemIndex <= 1 && listState.firstVisibleItemScrollOffset == 0) {
+            listState.animateScrollToItem(0)
+        }
+    }
+
     Column(modifier = modifier) {
         // 1. Search bar (fixed while the list scrolls)
         SearchField(
@@ -92,6 +110,7 @@ fun PersonListContent(
                 message = "No people match \"${searchQuery.trim()}\""
             )
             else -> LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {

@@ -10,9 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 
 @Composable
 fun InfoRow(
@@ -29,6 +30,8 @@ fun InfoRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // Screen readers read the label and value together ("Birthday, May 14, 2002")
+                .semantics(mergeDescendants = true) {}
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -36,14 +39,14 @@ fun InfoRow(
             Text(
                 text = label,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp,
+                style = AppTextStyles.body,
                 modifier = Modifier.weight(0.4f)
             )
             // Value right-aligned
             Text(
                 text = value,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 14.sp,
+                style = AppTextStyles.body,
                 textAlign = TextAlign.End,
                 modifier = Modifier.weight(0.6f)
             )

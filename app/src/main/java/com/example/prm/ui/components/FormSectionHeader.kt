@@ -8,9 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 
 // Small purple heading with a line under it, e.g. "RELATIONSHIP DETAILS"
 @Composable
@@ -25,9 +26,9 @@ fun FormSectionHeader(
         Text(
             text = title.uppercase(),
             color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            letterSpacing = 1.sp
+            style = AppTextStyles.sectionHeader,
+            // Lets screen-reader users jump between form sections
+            modifier = Modifier.semantics { heading() }
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }

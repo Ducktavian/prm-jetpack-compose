@@ -39,8 +39,15 @@ It is built with **Kotlin** and **Jetpack Compose** (Material 3), following an M
 
 **Safety and feedback**
 - Every save and delete asks for **confirmation** first.
+- Deletes can be reversed: the message after deleting has an **Undo** button.
 - Leaving a form with unsaved changes asks **"Discard changes?"**.
+- Required fields show an error under the field; after the first Save attempt, errors clear as you fix them.
 - A short message appears after each action (e.g. *"Person added successfully."*).
+
+**Accessibility**
+- Works with **TalkBack**: section titles are headings (swipe between them), a person card reads as one item (*"Alex Santos, Friend"*), and each **•••** button names its interaction.
+- Required fields are read as *"First name, required"*, and messages are announced when they appear.
+- Text sizes follow the phone's font size setting.
 
 ---
 
@@ -61,7 +68,7 @@ It is built with **Kotlin** and **Jetpack Compose** (Material 3), following an M
 
 ### Edit or delete a person
 - Open the person, then tap **Edit** (top right). Change any fields, tap **Save**, then **Save Changes**.
-- To remove them, tap **Delete** (top right) and confirm. This also removes all their interactions.
+- To remove them, tap **Delete** (top right) and confirm. This also removes all their interactions. Changed your mind? Tap **Undo** in the message that appears.
 
 ### Log an interaction
 1. Open a person and scroll to **Interactions**.
@@ -70,7 +77,7 @@ It is built with **Kotlin** and **Jetpack Compose** (Material 3), following an M
 4. Tap **Save Interaction**, then **Add Interaction** to confirm.
 
 ### Edit or delete an interaction
-- Tap the **•••** next to an interaction, then choose **Edit** or **Delete**.
+- Tap the **•••** next to an interaction, then choose **Edit** or **Delete**. A deleted interaction can be brought back with **Undo**.
 
 ### Leaving without saving
 - Tap **Cancel** / **Back** (or use the phone's back gesture). If you've changed anything, the app asks before discarding it.
@@ -91,7 +98,7 @@ The project pins its own build tools, so no extra installs are needed:
 | Gradle (wrapper) | 9.6.0 |
 | Android Gradle Plugin | 9.4.1 |
 | Kotlin | 2.0.21 |
-| Compose BOM | 2026.02.01 |
+| Compose BOM | 2026.09.00 |
 
 ### Steps
 1. Clone the repository:
@@ -107,7 +114,7 @@ Or from the command line, with a device connected:
 ```
 
 ### Running the tests
-Unit tests cover the data layer, form logic, ViewModels, and date/time formatting:
+70 unit tests cover the repository (including Undo), form conversion and validation, every ViewModel (search, detail, add/edit forms), and date/time formatting:
 ```bash
 ./gradlew testDebugUnitTest
 ```
@@ -138,8 +145,9 @@ app/src/main/java/com/example/prm/
 │   ├── persondetail/            Person details + delete confirmations
 │   ├── personedit/              Add/Edit person form (PersonForm = form state & validation)
 │   ├── interactionform/         Add/Edit interaction form
+│   ├── form/                    Shared by both forms: FormState, FormFlow, "Other / Custom" helpers
 │   ├── components/              Reusable UI: cards, form fields, pickers, sheets, snackbar
-│   └── theme/                   Colors, typography, Material theme
+│   └── theme/                   Colors, text styles (AppTextStyles), Material theme
 └── util/DateFormat.kt           Date/time display and conversion helpers
 ```
 
@@ -158,6 +166,9 @@ app/src/main/java/com/example/prm/
 - **Dates are stored as text** (`yyyy-MM-dd`, times as `HH:mm`) and only formatted for display. Date pickers convert using UTC so the chosen day never shifts by time zone.
 - **Forms hold plain text** while you type (e.g. `"UI/UX, Figma"`) and are converted to the data model only on save, where text is trimmed and empty entries removed.
 - **Screens are split** into a stateful part (connected to the ViewModel) and a stateless `…Content` part, so each screen has an Android Studio **preview**.
+- **The two forms share their logic** instead of repeating it: `FormState` (form values, errors, live validation) is used by both form ViewModels, and `FormFlow` (Save confirmation, "Discard changes?", system back) by both form screens.
+- **Undo** works by having each delete return an action that puts the item back; the snackbar runs it if **Undo** is tapped.
+- **Text styles live in one place** (`AppTextStyles` in `ui/theme/Type.kt`) instead of font sizes on each `Text`.
 - The theme uses a fixed purple brand color (dynamic wallpaper colors are turned off). Light and dark mode are both supported.
 
 ---
@@ -170,8 +181,19 @@ app/src/main/java/com/example/prm/
 | UI | Jetpack Compose, Material 3 |
 | Architecture | MVVM, StateFlow, Compose state |
 | Navigation | Navigation Compose |
-| Testing | JUnit 4 |
+| Testing | JUnit 4, kotlinx-coroutines-test |
 | Min / target SDK | 24 / 37 |
+
+---
+
+## User testing & feedback
+
+_[Fill in: who tried the app and how, e.g. "3 classmates used it on their phones to add a person and log an interaction."]_
+
+| Feedback | What changed |
+|---|---|
+| _[e.g. "I deleted someone by accident"]_ | _[e.g. Added Undo to the delete message]_ |
+| _[Feedback]_ | _[Change]_ |
 
 ---
 

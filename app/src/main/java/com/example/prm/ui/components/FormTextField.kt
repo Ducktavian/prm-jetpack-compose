@@ -10,12 +10,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 
 @Composable
 fun FormTextField(
@@ -71,7 +72,10 @@ internal fun FormLabel(
             }
         },
         color = MaterialTheme.colorScheme.onSurface,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp
+        style = AppTextStyles.fieldLabel,
+        // Screen readers say "First name, required" instead of "First name star"
+        modifier = Modifier.semantics {
+            contentDescription = if (required) "$label, required" else label
+        }
     )
 }

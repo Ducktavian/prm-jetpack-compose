@@ -3,6 +3,7 @@ package com.example.prm.ui.interactionform
 import androidx.lifecycle.SavedStateHandle
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.navigation.Routes
+import com.example.prm.ui.form.OTHER_OPTION
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -88,7 +89,7 @@ class InteractionFormTest {
 
     @Test
     fun otherType_savesCustomTextAndRequiresIt() {
-        val form = InteractionForm(date = "2026-10-01", time = "09:00", type = OTHER_INTERACTION_TYPE)
+        val form = InteractionForm(date = "2026-10-01", time = "09:00", type = OTHER_OPTION)
         assertNotNull(form.validate().customType)
 
         val interaction = form.copy(customType = " Study Session ").toInteraction()
@@ -100,11 +101,11 @@ class InteractionFormTest {
     fun toForm_customTypeOpensAsOther_andFallbackTitleIsCleared() {
         val interaction = InteractionForm(
             date = "2026-09-10", time = "14:00",
-            type = OTHER_INTERACTION_TYPE, customType = "Study Session"
+            type = OTHER_OPTION, customType = "Study Session"
         ).toInteraction(id = 5)
 
         val form = interaction.toForm()
-        assertEquals(OTHER_INTERACTION_TYPE, form.type)
+        assertEquals(OTHER_OPTION, form.type)
         assertEquals("Study Session", form.customType)
         assertEquals("", form.title)
         // Round trip keeps everything

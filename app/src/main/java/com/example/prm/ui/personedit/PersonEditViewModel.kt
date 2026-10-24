@@ -1,13 +1,11 @@
 package com.example.prm.ui.personedit
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.prm.data.model.Person
 import com.example.prm.data.repository.PersonRepository
 import com.example.prm.navigation.Routes
+import com.example.prm.ui.form.FormState
 
 // One instance per edit/add screen. personId comes from the route, like PersonDetailViewModel.
 // No personId (the "person_add" route) means Add mode: blank form, save creates a new person.
@@ -24,27 +22,25 @@ class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     // False only when editing an id that doesn't exist
     val isPersonFound: Boolean = isNewPerson || original != null
 
-    // What the form started with; Add mode starts blank with "Friend" preselected
-    private val initialForm: PersonForm = original?.toForm() ?: PersonForm(category = "Friend")
+    // Form contents + errors. Add mode starts blank with "Friend" preselected.
+    private val formState = FormState(
+        initial = original?.toForm() ?: PersonForm(category = "Friend"),
+        noErrors = PersonFormErrors(),
+        validator = { it.validate() }
+    )
 
-    var form by mutableStateOf(initialForm)
-        private set
+    val form: PersonForm
+        get() = formState.form
 
-    var errors by mutableStateOf(PersonFormErrors())
-        private set
-
-    // After the first Save attempt, errors update live as the user fixes fields
-    private var saveAttempted = false
+    val errors: PersonFormErrors
+        get() = formState.errors
 
     // True if anything differs from what the form started with (used for "Discard changes?")
     val hasChanges: Boolean
-        get() = isPersonFound && form != initialForm
+        get() = isPersonFound && formState.hasChanges
 
     // Generic field update, e.g. onFormChange { copy(firstName = newText) }
-    fun onFormChange(update: PersonForm.() -> PersonForm) {
-        form = form.update()
-        if (saveAttempted) errors = form.validate()
-    }
+    fun onFormChange(update: PersonForm.() -> PersonForm) = formState.update(update)
 
     // Phones: one text box per number
     fun addPhone() = onFormChange { copy(phones = phones + "") }
@@ -60,11 +56,7 @@ class PersonEditViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     // Checks required fields and shows any errors. Returns true if the form is valid.
     // Called when Save is tapped, before the "Save changes?" confirmation.
-    fun validate(): Boolean {
-        saveAttempted = true
-        errors = form.validate()
-        return !errors.hasErrors
-    }
+    fun validate(): Boolean = formState.validate()
 
     // Validates, then saves to the repository (adds in Add mode, updates otherwise).
     // Returns true if saved (the screen then navigates back), false if there are errors.

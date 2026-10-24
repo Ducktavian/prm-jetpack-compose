@@ -41,8 +41,9 @@ fun PersonDetailScreen(
     onAddInteractionClick: (Int) -> Unit = {},
     // (personId, interactionId)
     onEditInteractionClick: (Int, Int) -> Unit = { _, _ -> },
-    onInteractionDeleted: () -> Unit = {},
-    onDeleted: () -> Unit = {}
+    // Both get the Undo action for the snackbar (null if nothing was deleted)
+    onInteractionDeleted: ((() -> Unit)?) -> Unit = {},
+    onDeleted: ((() -> Unit)?) -> Unit = {}
 ) {
     val person = viewModel.person
     // Saveable so an open sheet survives rotation
@@ -67,29 +68,27 @@ fun PersonDetailScreen(
         val whenText = "${formatDisplayDate(interaction.date)} · ${formatDisplayTime(interaction.time)}"
         ConfirmationSheet(
             title = "Delete interaction?",
-            message = "This will permanently remove the ${interaction.title.lowercase()} " +
-                    "from $whenText. This cannot be undone.",
+            message = "This will remove the ${interaction.title.lowercase()} " +
+                    "from $whenText. You can undo this for a few seconds.",
             confirmText = "Delete Interaction",
             onConfirm = {
                 interactionToDeleteId = null
-                viewModel.deleteInteraction(interaction.id)
-                onInteractionDeleted()
+                onInteractionDeleted(viewModel.deleteInteraction(interaction.id))
             },
             onDismiss = { interactionToDeleteId = null }
         )
     }
 
     if (showDeleteSheet && person != null) {
-        val fullName = "${person.firstName} ${person.lastName}".trim()
+        val fullName = person.fullName
         ConfirmationSheet(
             title = "Delete $fullName?",
-            message = "This will permanently remove $fullName and all their " +
-                    "interaction history. This cannot be undone.",
+            message = "This will remove $fullName and all their interaction history. " +
+                    "You can undo this for a few seconds.",
             confirmText = "Delete",
             onConfirm = {
                 showDeleteSheet = false
-                viewModel.deletePerson()
-                onDeleted()
+                onDeleted(viewModel.deletePerson())
             },
             onDismiss = { showDeleteSheet = false }
         )

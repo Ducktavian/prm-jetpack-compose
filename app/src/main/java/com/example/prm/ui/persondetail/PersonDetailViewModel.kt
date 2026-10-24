@@ -38,14 +38,15 @@ class PersonDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
         }
     }
 
-    fun deleteInteraction(interactionId: Int) {
-        val id = personId ?: return
-        personRepository.deleteInteraction(id, interactionId)
+    // Both deletes return an Undo action for the snackbar (null if nothing was deleted)
+    fun deleteInteraction(interactionId: Int): (() -> Unit)? {
+        val id = personId ?: return null
+        return personRepository.deleteInteraction(id, interactionId)
     }
 
-    fun deletePerson() {
-        val id = personId ?: return
+    fun deletePerson(): (() -> Unit)? {
+        val id = personId ?: return null
         isDeleted = true
-        personRepository.deletePerson(id)
+        return personRepository.deletePerson(id)
     }
 }

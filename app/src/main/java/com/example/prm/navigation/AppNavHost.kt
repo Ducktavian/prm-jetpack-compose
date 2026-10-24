@@ -4,14 +4,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -69,8 +72,23 @@ fun AppNavHost(
     // (e.g. delete on Detail, message shows on the List)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val showMessage: (String) -> Unit = { message ->
-        scope.launch { snackbarHostState.showSnackbar(message) }
+
+    // Pass onUndo to add an Undo button; tapping it runs onUndo and confirms with undoneMessage
+    fun showMessage(message: String, onUndo: (() -> Unit)? = null, undoneMessage: String = "") {
+        scope.launch {
+            // Replace any message still showing instead of queueing behind it
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = if (onUndo != null) "Undo" else null,
+                // Long gives time to reach Undo (a button otherwise keeps it up until tapped)
+                duration = if (onUndo != null) SnackbarDuration.Long else SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed && onUndo != null) {
+                onUndo()
+                showMessage(undoneMessage)
+            }
+        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -117,13 +135,14 @@ fun AppNavHost(
                         navController.navigateFrom(entry, Routes.interactionEdit(personId, interactionId))
                     },
                     // Stays on Detail (which already updated itself); just confirm it
-                    onInteractionDeleted = {
-                        showMessage("Interaction deleted successfully.")
+                    onInteractionDeleted = { undo ->
+                        showMessage("Interaction deleted.", undo, "Interaction restored.")
                     },
-                    // Person is gone, so go back to the list (which already updated itself)
-                    onDeleted = {
+                    // Person is gone, so go back to the list (which already updated itself
+                    // and shows them again if Undo is tapped)
+                    onDeleted = { undo ->
                         navController.popFrom(entry)
-                        showMessage("Person deleted successfully.")
+                        showMessage("Person deleted.", undo, "Person restored.")
                     }
                 )
             }
@@ -202,15 +221,21 @@ fun AppNavHost(
             }
         }
 
-        // Bottom-center, above the system navigation bar
+        // Bottom-center, above the system navigation bar. zIndex keeps it above the screens
+        // for touches too, so tapping Undo can't open the person card underneath.
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
+                .zIndex(1f)
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp)
         ) { data ->
-            MessageSnackbar(message = data.visuals.message)
+            MessageSnackbar(
+                message = data.visuals.message,
+                actionLabel = data.visuals.actionLabel,
+                onAction = data::performAction
+            )
         }
     }
 }

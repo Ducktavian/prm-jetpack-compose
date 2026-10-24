@@ -9,7 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 
 // Small read-only pill, e.g. relationship category, skills, interests
 @Composable
@@ -26,7 +26,7 @@ fun TagChip(
         Text(
             text = text,
             color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 12.sp,
+            style = AppTextStyles.caption,
             maxLines = 1,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )

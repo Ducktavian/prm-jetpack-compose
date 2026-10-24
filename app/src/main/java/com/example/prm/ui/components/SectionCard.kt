@@ -18,10 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.prm.ui.theme.AppTextStyles
 import com.example.prm.ui.theme.PRMTheme
 
 @Composable
@@ -50,10 +52,11 @@ fun SectionCard(
             Text(
                 text = title.uppercase(),
                 color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                letterSpacing = 1.sp,
-                modifier = Modifier.weight(1f)
+                style = AppTextStyles.sectionHeader,
+                // Lets screen-reader users jump between sections
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { heading() }
             )
             if (action != null) {
                 // Plain Text/Icon inside the action becomes readable on the header color

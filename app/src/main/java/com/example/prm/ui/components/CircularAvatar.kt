@@ -9,11 +9,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// Purple circle with initials. Always shown next to the person's name, so screen
+// readers skip it (otherwise TalkBack reads "AS" before "Alex Santos").
 @Composable
 fun CircularAvatar(
     initials: String,
@@ -24,7 +27,8 @@ fun CircularAvatar(
             .size(size)
             .background(
                 color = MaterialTheme.colorScheme.primary, shape = CircleShape
-            ),
+            )
+            .clearAndSetSemantics {},
         contentAlignment = Alignment.Center
     ) {
         Text(
