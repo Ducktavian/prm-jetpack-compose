@@ -6,6 +6,12 @@ It is built with **Kotlin** and **Jetpack Compose** (Material 3), following an M
 
 > **Note:** This version keeps data **in memory only**. It starts with sample people, and any changes (adding, editing, deleting) are lost when the app is closed. Saving to a database is planned for a later version.
 
+## Group members
+
+| Name                  | Role |
+|-----------------------|---|
+| _Lebron Dustin M. Uy_ | _Solo developer: design, implementation, testing_ |
+
 ---
 
 ## Features
@@ -74,9 +80,18 @@ It is built with **Kotlin** and **Jetpack Compose** (Material 3), following an M
 ## Running the project
 
 ### Requirements
-- **Android Studio** (a recent version that supports AGP 9.x)
+- **Android Studio** _[the version you built with, e.g. from Help → About]_, or any version that supports **Android Gradle Plugin 9.4.1**
 - **JDK 17 or newer** (Android Studio's bundled JDK works)
 - An Android device or emulator running **Android 7.0 (API 24) or newer**
+
+The project pins its own build tools, so no extra installs are needed:
+
+| Tool | Version |
+|---|---|
+| Gradle (wrapper) | 9.6.0 |
+| Android Gradle Plugin | 9.4.1 |
+| Kotlin | 2.0.21 |
+| Compose BOM | 2026.02.01 |
 
 ### Steps
 1. Clone the repository:

@@ -18,11 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.prm.R
 import com.example.prm.data.model.Person
+import com.example.prm.data.repository.PersonRepository
 import com.example.prm.ui.components.PersonCard
 import com.example.prm.ui.components.SearchField
+import com.example.prm.ui.theme.PRMTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,4 +116,32 @@ private fun EmptyState(message: String) {
             .fillMaxWidth()
             .padding(32.dp)
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PersonListPreview() {
+    PRMTheme {
+        PersonListContent(
+            people = PersonRepository.getPeople(),
+            hasNoPeople = false,
+            searchQuery = "",
+            onSearchQueryChange = {},
+            onPersonClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PersonListEmptyPreview() {
+    PRMTheme {
+        PersonListContent(
+            people = emptyList(),
+            hasNoPeople = true,
+            searchQuery = "",
+            onSearchQueryChange = {},
+            onPersonClick = {}
+        )
+    }
 }
